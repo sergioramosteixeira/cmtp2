@@ -1,25 +1,33 @@
 
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/clubes.dart';
 import 'package:flutter_application_1/models/clube.dart';
+import 'package:flutter_application_1/models/jogo.dart';
 
-class Clubes {
-  Map <int, Clube> _clubes = <int, Clube>{};
+class Jogos {
+  List<Jogo> _jogos = [];
 
-  Map <int, Clube> get list => _clubes;
+  List<Jogo> get allJogos => [..._jogos];
 
-  void add(Clube clube) {
-    int key = getMaxKey() + 1;
-    _clubes.addEntries([MapEntry(key, clube)]);
+  final CollectionReference _collectionRef =FirebaseFirestore.instance.collection('jogos');
+
+  Future<List<Jogo>> getJogos(Clubes clubes) async {
+
+      QuerySnapshot querySnapshot = await _collectionRef.get();
+      Clube casa;
+      Clube fora;
+
+      querySnapshot.docs.map((doc) => doc.data()).toList().forEach((jogo) {
+        dynamic j = jogo;
+        casa = clubes.getClubeBySigla(j['clubeCasa']);
+        fora = clubes.getClubeBySigla(j['clubeFora']);
+        _jogos.add(Jogo.fromJson(jogo, casa, fora));
+      });
+
+      return _jogos;
   }
 
-  int getMaxKey(){
-    var thevalue=0;
-
-    _clubes.keys.forEach((k){
-      if(k>thevalue) {
-        thevalue = k;
-      }
-    });
-
-    return thevalue;
-  }
+  List<Jogo> get list => _jogos.toList();
 }

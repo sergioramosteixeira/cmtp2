@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "988448113756",
+    "project_id": "ligaportugal",
+    "storage_bucket": "ligaportugal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988448113756:android:09e6d3847043b57bf59299",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "988448113756-paf2bn872ntf64sqb3li6j12pn0fmo8v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIDUPGz8hy6jemtP9aAJ40JPSR7avz5zw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988448113756-paf2bn872ntf64sqb3li6j12pn0fmo8v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

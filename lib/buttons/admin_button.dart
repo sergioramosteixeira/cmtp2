@@ -12,18 +12,18 @@ class AdminButton extends StatelessWidget{
       onPressed: _codeToRun,
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white, 
-        backgroundColor: Colors.green, 
+        backgroundColor: Colors.green.withOpacity(0.5), 
         padding: const EdgeInsets.all(50), 
         disabledForegroundColor: Colors.lightGreen.withOpacity(0.38), 
         disabledBackgroundColor: Colors.lightGreen.withOpacity(0.12),
         shadowColor: Colors.green,
         textStyle: const TextStyle(
-          fontSize: 20,
+          fontSize: 24,
+          fontFamily: 'Changa',
         )
       ), 
       child: Text(
         _text,
-        style: const TextStyle(fontSize: 20),
       ),
     );
   }

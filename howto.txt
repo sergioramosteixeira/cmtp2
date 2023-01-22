@@ -1,0 +1,13 @@
+https://console.firebase.google.com/u/0/project/ligaportugal/settings/general
+
+
+
+In Dart, a factory is a special kind of constructor that can be used to return an instance of a class. The factory keyword is used to indicate that this constructor does not always create a new instance of the class, but instead returns an existing instance or a new instance based on some logic.
+
+Using a factory constructor can be useful in several situations, such as when you want to return a cached instance of an object, or when you want to return a subtype of a class based on some input.
+
+A factory constructor can be used as an alternative to a regular constructor and allows to simplify the code and make it more readable. It can also be used to create a singleton, which is a class that only allows one instance of itself to be created.
+
+In the example provided, the factory Clube.fromJson constructor is used to parse the data from the Firestore documents and it returns a new instance of the Clube class. This constructor does not always create a new instance of the class, but instead it creates a new instance based on the data passed to it.
+
+Using a factory constructor in this case allows for a more readable and maintainable code, because it separates the object creation logic from the rest of the code.

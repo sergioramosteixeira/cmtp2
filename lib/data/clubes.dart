@@ -1,24 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/clube.dart';
 
 class Clubes {
-  Map <int, Clube> _clubes = <int, Clube>{};
+  List<Clube> _clubes = [];
 
-  Map <int, Clube> get list => _clubes;
+  List<Clube> get allClubes => [..._clubes];
 
-  void add(Clube clube) {
-    int key = getMaxKey() + 1;
-    _clubes.addEntries([MapEntry(key, clube)]);
+
+  final CollectionReference _collectionRef =FirebaseFirestore.instance.collection('clubes');
+
+  Future<List<Clube>> getClubes() async {
+
+      QuerySnapshot querySnapshot = await _collectionRef.get();
+
+
+      querySnapshot.docs.map((doc) => doc.data()).toList().forEach((clube) {
+        _clubes.add(Clube.fromJson(clube));
+      });
+
+      return _clubes;
   }
 
-  int getMaxKey(){
-    var thevalue=0;
-
-    _clubes.keys.forEach((k){
-      if(k>thevalue) {
-        thevalue = k;
-      }
-    });
-
-    return thevalue;
+  Clube getClubeBySigla(String sigla) {
+    return allClubes.firstWhere((Clube c) => c.sigla == sigla);
   }
+
+  List<Clube> get list => _clubes.toList();
+
 }
