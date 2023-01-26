@@ -11,7 +11,7 @@ class BwinButton extends StatelessWidget{
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: (){ 
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LeagueHome(logo: "bwin")));
+        Navigator.pushNamed(context, LeagueHome.routeName);
         LeagueHome(logo: "bwin"); 
       },
       style: ElevatedButton.styleFrom(

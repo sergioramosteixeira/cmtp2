@@ -57,7 +57,7 @@ class _MainMenu extends State<MainMenu> {
               width: double.infinity,
               margin: const EdgeInsets.all(0),
               padding: const EdgeInsets.all(10),
-              child: AdminButton(alert, 'Admin'),
+              child: AdminButton('Admin'),
             ),
             const Text(
               "Desenvolvido por Lara Figueiredo e Sérgio Teixeira", style: TextStyle(color: Colors.white)),

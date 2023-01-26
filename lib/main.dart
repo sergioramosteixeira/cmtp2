@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/firebase_options.dart';
+import 'package:flutter_application_1/screens/addclube.dart';
+import 'package:flutter_application_1/screens/addjogo.dart';
+import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/leaguehome.dart';
 import 'package:flutter_application_1/screens/mainmenu.dart';
 //import 'package:provider/provider.dart';
@@ -31,6 +34,9 @@ class App extends StatelessWidget {
       routes: {
         MainMenu.routeName: (context) => MainMenu(),
         LeagueHome.routeName: (context) => LeagueHome(logo: "bwin"),
+        AdminScreen.routeName: (context) => AdminScreen(),
+        AddClube.routeName: (context) => AddClube(),
+        AddJogo.routeName: (context) => AddJogo(),
       },
     );
   }

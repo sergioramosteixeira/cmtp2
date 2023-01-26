@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Clube {
-  int clubeId;
+  //int clubeId;
   String nome;
   String sigla;
   String logo;
@@ -13,7 +13,7 @@ class Clube {
   int capacidadeEstadio;
 
   Clube({
-      required this.clubeId,
+      //required this.clubeId,
       required this.nome,
       required this.sigla,
       required this.logo,
@@ -26,7 +26,7 @@ class Clube {
 
   factory Clube.fromJson(dynamic json) {
     return Clube(
-      clubeId: json['clubeId'],
+      //clubeId: json['clubeId'],
       nome: json['nome'],
       sigla: json['sigla'],
       logo: json['logo'],
@@ -38,6 +38,7 @@ class Clube {
       capacidadeEstadio: json['capacidadeEstadio'],
     );
   }
+
   
   /*Clube.fromJson(Map<String, dynamic> json) {
     clubeId = json['clube_Id'];

@@ -2,7 +2,7 @@ import 'package:flutter_application_1/data/clubes.dart';
 import 'package:flutter_application_1/models/clube.dart';
 
 class Jogo {
-  int jogoId;
+  //int jogoId;
   String liga;
   DateTime dataJogo;
   String jornada;
@@ -14,7 +14,7 @@ class Jogo {
   int golosFora;
 
   Jogo({
-    required this.jogoId,
+    //required this.jogoId,
     required this.liga,
     required this.dataJogo,
     required this.jornada,
@@ -32,7 +32,7 @@ class Jogo {
 
   factory Jogo.fromJson(dynamic json, Clube casa, Clube fora)  {
     return Jogo(
-      jogoId: json['jogoId'],
+      //jogoId: json['jogoId'],
       liga: json['liga'],
       dataJogo: DateTime.parse(json['dataJogo']),
       jornada: json['jornada'],

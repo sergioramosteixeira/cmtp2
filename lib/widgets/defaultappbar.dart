@@ -37,7 +37,7 @@ class _DefaultAppBarState extends State<DefaultAppBar> {
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
         onPressed: () {
-          Navigator.of(context).pushNamedAndRemoveUntil(MainMenu.routeName, (Route<dynamic> route) => false);
+          Navigator.of(context).pop();
         },
       ),
       // other properties
