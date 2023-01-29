@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
+import 'package:flutter_application_1/screens/clubesinscritos.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class AddClube extends StatelessWidget{
@@ -118,8 +119,8 @@ class AddClube extends StatelessWidget{
                       "capacidadeEstadio": capacidadeEstadioInt,
                     });
 
-                  Navigator.pushNamed(context, AdminScreen.routeName);
-                  AdminScreen(); 
+                  Navigator.pushNamed(context, ClubesInscritos.routeName);
+                  ClubesInscritos(); 
                   
                 },
                 style: ElevatedButton.styleFrom(

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/addclube.dart';
+import 'package:flutter_application_1/screens/addjogador.dart';
 import 'package:flutter_application_1/screens/addjogo.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
+import 'package:flutter_application_1/screens/clubesinscritos.dart';
+
+import '../screens/jogadoresinscritos.dart';
 
 class AdminButton extends StatelessWidget{
   final _text;
@@ -25,9 +29,19 @@ class AdminButton extends StatelessWidget{
             Navigator.pushNamed(context, AddJogo.routeName);
             AddJogo(); 
             break;
+          case 'Adicionar Jogadores':
+            Navigator.pushNamed(context, AddJogador.routeName);
+            AddJogador(); 
+            break;
+          case 'Clubes Inscritos':
+            Navigator.pushNamed(context, ClubesInscritos.routeName);
+            ClubesInscritos(); 
+            break;
+          case 'Jogadores Inscritos':
+            Navigator.pushNamed(context, JogadoresInscritos.routeName);
+            JogadoresInscritos(); 
+            break;
           default:
-        }
-        if(_text=='Admin'){
         }
 
       },

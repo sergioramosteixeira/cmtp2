@@ -5,7 +5,7 @@ class Jogo {
   //int jogoId;
   String liga;
   DateTime dataJogo;
-  String jornada;
+  int jornada;
   String estadio;
   String arbitro;
   Clube clubeCasa;
