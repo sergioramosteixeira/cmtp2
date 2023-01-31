@@ -1,12 +1,15 @@
 import 'dart:js';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/data/classificacoes.dart';
 import 'package:flutter_application_1/data/clubes.dart';
 import 'package:flutter_application_1/data/jogos.dart';
 import 'package:flutter_application_1/models/classificacao.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogo.dart';
+import 'package:flutter_application_1/screens/adminscreen.dart';
+import 'package:flutter_application_1/screens/clubescreen.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 import 'package:intl/intl.dart';
@@ -14,8 +17,8 @@ import 'package:intl/intl.dart';
 
 class LeagueHome extends StatefulWidget{
   static const String routeName = '/leaguehome';
-  final String logo;
-  LeagueHome({required this.logo});
+  final String liga;
+  LeagueHome({required this.liga});
   
 
   @override
@@ -48,7 +51,7 @@ class _LeagueHomeState extends State<LeagueHome> {
   final Clubes _clubes = Clubes();
   final Jogos _jogos = Jogos();
   final Classificacoes _classif = Classificacoes();
-  final List<int> _jornadas = getJornadas("BWIN");
+  List<int> _jornadas = [];
   
   int jornada = 3;
 
@@ -60,6 +63,7 @@ class _LeagueHomeState extends State<LeagueHome> {
 
   @override
   void initState() {
+    _jornadas = getJornadas(widget.liga);
     super.initState();
     _clubes.getClubes();
     setState(() {
@@ -102,7 +106,7 @@ class _LeagueHomeState extends State<LeagueHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: DefaultAppBar(logo: "${widget.logo}_h"),
+      appBar: DefaultAppBar(logo: "${widget.liga}_h"),
       body: SizedBox.expand(
         child: Container(
           decoration: const BoxDecoration(
@@ -119,7 +123,7 @@ class _LeagueHomeState extends State<LeagueHome> {
                     getJornada(jornada), style: TextStyle(color: Colors.white)),
                 ),
                 FutureBuilder<List<dynamic>>(
-                  future: Future.wait([_jogos.getJogos(_clubes, "BWIN", jornada)]),
+                  future: Future.wait([_jogos.getJogos(_clubes, widget.liga, jornada)]),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Container(
@@ -168,37 +172,50 @@ class _LeagueHomeState extends State<LeagueHome> {
                   ],
                 ),
                 FutureBuilder<List<dynamic>>(
-                  future: Future.wait([_clubes.getClubes(),_classif.getClassificacao(_clubes, "BWIN", jornada)]),
+                  future: Future.wait([_clubes.getClubes(),_classif.getClassificacao(_clubes, widget.liga, jornada)]),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       int pos=1;
+                      List<String> grupos = [];
+                      List<Widget> widgets = [];
+                      (widget.liga == "Allianz") ? grupos = ['A','B','C','D','E','F','G','H'] : grupos = [""];
+                      grupos.forEach((grupo) => {
+                        pos = 1,
+                        widgets.add(Text(grupo)),
+                        widgets.add(DataTable(
+                          dataTextStyle: const TextStyle(color: Colors.white, fontFamily: 'Changa'),
+                          headingRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 70, 202, 255).withOpacity(0.8);},),
+                          dataRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 13, 20).withOpacity(0.8);},),
+                          columns: const [
+                            DataColumn(label: Text('Pos')),
+                            DataColumn(label: Text('Clube')),
+                            DataColumn(label: Text('J')),
+                            DataColumn(label: Text('V-E-D')),
+                            DataColumn(label: Text('DG')),
+                            DataColumn(label: Text('Pts')),
+                          ],
+                          rows: _classif.list.where((e) => e.grupo==grupo || widget.liga != "Allianz")
+                              .map((Classificacao c) => DataRow(cells: [
+                                DataCell(Text((pos++).toString())),
+                                DataCell(
+                                  InkWell(
+                                    child: Text(c.clube.sigla),
+                                    onTap: () => Navigator.pushNamed(context, '${ClubeScreen.routeName}/${c.clube.sigla}')
+                                  ),
+                                ),
+                                DataCell(Text(c.jogos.toString())),
+                                DataCell(Text("${c.vitorias}-${c.empates}-${c.derrotas}")),
+                                DataCell(Text((c.golosMarcados-c.golosSofridos).toString())),
+                                DataCell(Text(c.pontos.toString())),
+                              ])).toList(),
+                        )),
+                      });
                       return Container(
                         width: double.infinity,
                         margin: const EdgeInsets.all(0),
                         padding: const EdgeInsets.all(10),
-                        child: Center(
-                          child: DataTable(
-                            dataTextStyle: const TextStyle(color: Colors.white, fontFamily: 'Changa'),
-                            headingRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 70, 202, 255).withOpacity(0.8);},),
-                            dataRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 13, 20).withOpacity(0.8);},),
-                            columns: const [
-                              DataColumn(label: Text('Pos')),
-                              DataColumn(label: Text('Clube')),
-                              DataColumn(label: Text('J')),
-                              DataColumn(label: Text('V-E-D')),
-                              DataColumn(label: Text('DG')),
-                              DataColumn(label: Text('Pts')),
-                            ],
-                            rows: _classif.list
-                                .map((Classificacao c) => DataRow(cells: [
-                                  DataCell(Text((pos++).toString())),
-                                  DataCell(Text(c.clube.sigla)),
-                                  DataCell(Text(c.jogos.toString())),
-                                  DataCell(Text("${c.vitorias}-${c.empates}-${c.derrotas}")),
-                                  DataCell(Text((c.golosMarcados-c.golosSofridos).toString())),
-                                  DataCell(Text(c.pontos.toString())),
-                                ])).toList(),
-                          ),
+                        child: Column(
+                          children: widgets,
                         ),
                       );
                     } else if (snapshot.hasError) {

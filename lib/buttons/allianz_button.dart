@@ -3,17 +3,16 @@ import 'package:flutter/material.dart';
 import '../screens/leaguehome.dart';
 
 class AllianzButton extends StatelessWidget{
-  final VoidCallback _codeToRun;
   final _text;
 
-  AllianzButton(this._codeToRun, this._text);
+  AllianzButton(this._text);
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: (){ 
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LeagueHome(logo: "allianz")));
-        LeagueHome(logo: "allianz"); 
+        Navigator.pushNamed(context, LeagueHome.routeName+"/Allianz");
+        LeagueHome(liga: "Allianz"); 
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white, 

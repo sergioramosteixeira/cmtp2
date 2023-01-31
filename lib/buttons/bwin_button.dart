@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/leaguehome.dart';
 
 class BwinButton extends StatelessWidget{
-  final VoidCallback _codeToRun;
   final _text;
 
-  BwinButton(this._codeToRun, this._text);
+  BwinButton(this._text);
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: (){ 
-        Navigator.pushNamed(context, LeagueHome.routeName);
-        LeagueHome(logo: "bwin"); 
+        Navigator.pushNamed(context, LeagueHome.routeName+"/BWIN");
+        LeagueHome(liga: "BWIN"); 
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.orange, 

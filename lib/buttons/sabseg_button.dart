@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/leaguehome.dart';
 
 class SabsegButton extends StatelessWidget{
-  final VoidCallback _codeToRun;
   final _text;
 
-  SabsegButton(this._codeToRun, this._text);
+  SabsegButton(this._text);
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: (){ 
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LeagueHome(logo: "sabseg")));
-        LeagueHome(logo: "sabseg"); 
+        Navigator.pushNamed(context, LeagueHome.routeName+"/Sabseg");
+        LeagueHome(liga: "Sabseg"); 
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white, 

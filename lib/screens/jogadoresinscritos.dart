@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 class JogadoresInscritos extends StatefulWidget{
   static final String routeName = '/jogadoresinscritos';
-  final String? passaporte;
+  String? passaporte;
   JogadoresInscritos({this.passaporte});
 
   @override
@@ -35,7 +35,6 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
   @override
   void initState() {
     super.initState();
-    String defaultValue = "";
     _options = [];
     _firestore.collection("clubeJogadores").where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(DateTime.now())).get().then((snapshot) {
       snapshot.docs.forEach((document) {
@@ -45,10 +44,6 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
     _firestore.collection("jogadores").get().then((snapshot) {
       snapshot.docs.forEach((document) {
         if (!clubejogadores.contains(document["passaporte"])){
-          if (document["passaporte"] == widget.passaporte){
-            print(widget.passaporte);
-            defaultValue = document["passaporte"]+"-"+document["nomeCamisola"];
-          } 
           _optionsJogadores.add(
             DropdownMenuItem(
               child: Text(document["passaporte"]+"-"+document["nomeCamisola"]),
@@ -58,8 +53,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
         }
       });
       if (_optionsJogadores.isNotEmpty) {
-        if(defaultValue!="") _jogador = _optionsJogadores.firstWhere((item) => item.child == defaultValue).value!;
-        else _jogador = _optionsJogadores[0].value!;
+        _jogador = _optionsJogadores[0].value!;
       }
     });
     _firestore.collection("clubes").get().then((snapshot) {
@@ -159,7 +153,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                           "numeroCamisola": numeroCamisola.text,
                         });
 
-                      Navigator.pushNamed(context, AdminScreen.routeName);
+                      Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName));
                       AdminScreen(); 
                       
                     },

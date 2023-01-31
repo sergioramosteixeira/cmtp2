@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/mainmenu.dart';
 
 class DefaultAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final String logo;
+  final String? logo;
+  final String? texto;
   final Color backgroundColor = const Color.fromARGB(255, 12, 0, 62);
 
-  DefaultAppBar({required this.logo});
+  DefaultAppBar({this.logo, this.texto});
 
 
   @override
@@ -20,13 +21,13 @@ class _DefaultAppBarState extends State<DefaultAppBar> {
   Widget build(BuildContext context) {
     Color bckgnd;
     switch (widget.logo) {
-      case "bwin_h":
+      case "BWIN_h":
         bckgnd = Colors.black;
         break;
-      case "sabseg_h":
+      case "Sabseg_h":
         bckgnd = Colors.blue;
         break;
-      case "allianz_h":
+      case "Allianz_h":
         bckgnd = Colors.deepPurple;
         break;
       default:
@@ -37,18 +38,19 @@ class _DefaultAppBarState extends State<DefaultAppBar> {
       leading: IconButton(
         icon: Icon(Icons.arrow_back),
         onPressed: () {
-          Navigator.of(context).pop();
+          (ModalRoute.of(context)!.settings.name != "/") ? Navigator.of(context).pop() : null;
         },
       ),
+      title: Text((widget.texto != null) ? widget.texto! : '',),
       // other properties
-      flexibleSpace: Container(
+      flexibleSpace: (widget.texto == null) ? Container(
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage("../img/${widget.logo}.png"),
             fit: BoxFit.fitHeight,
           ),
         ),
-      ),
+      ) : null,
     );
   }
 }

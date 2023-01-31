@@ -4,6 +4,7 @@ import 'package:flutter_application_1/screens/addjogador.dart';
 import 'package:flutter_application_1/screens/addjogo.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/clubesinscritos.dart';
+import 'package:flutter_application_1/screens/relatorioinscritos.dart';
 
 import '../screens/jogadoresinscritos.dart';
 
@@ -41,16 +42,20 @@ class AdminButton extends StatelessWidget{
             Navigator.pushNamed(context, JogadoresInscritos.routeName);
             JogadoresInscritos(); 
             break;
+          case 'Relatório de Jogadores Ativos':
+            Navigator.pushNamed(context, RelatorioInscritos.routeName);
+            RelatorioInscritos(); 
+            break;
           default:
         }
 
       },
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white, 
-        backgroundColor: Colors.green.withOpacity(0.5), 
+        backgroundColor: Color.fromARGB(255, 12, 0, 62), 
         padding: const EdgeInsets.all(15), 
-        disabledForegroundColor: Colors.lightGreen.withOpacity(0.38), 
-        disabledBackgroundColor: Colors.lightGreen.withOpacity(0.12),
+        disabledForegroundColor: Color.fromARGB(232, 30, 0, 148), 
+        disabledBackgroundColor: Color.fromARGB(232, 30, 0, 148), 
         shadowColor: Colors.green,
         textStyle: const TextStyle(
           fontSize: 24,

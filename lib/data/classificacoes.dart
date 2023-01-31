@@ -18,7 +18,7 @@ class Classificacoes {
   Future<List<Classificacao>> getClassificacao(Clubes clubes, String liga, int jornada) async {
     _classif = [];
     QuerySnapshot querySnapshot = await _collectionClubes.where('liga', isEqualTo: liga).get();
-
+    if (jornada>90) jornada = 34;
 
     querySnapshot.docs.map((doc) => doc.data()).toList().forEach((clube) async {
       int vitorias = 0;
@@ -69,10 +69,17 @@ class Classificacoes {
         }
       });
 
-      _classif.add(Classificacao(clube: clubes.getClubeBySigla(c['clube']), derrotas: derrotas, empates: empates, golosMarcados: golosMarcados, golosSofridos: golosSofridos, pontos: pontos, vitorias: vitorias, jogos: jogos));
-      _classif.sort((a, b) => b.pontos - a.pontos);
+      _classif.add(Classificacao(clube: clubes.getClubeBySigla(c['clube']), derrotas: derrotas, empates: empates, golosMarcados: golosMarcados, golosSofridos: golosSofridos, pontos: pontos, vitorias: vitorias, jogos: jogos, grupo: "${c['grupo']}"));
+      _classif.sort((a, b) {
+        if (a.grupo != b.grupo) {
+          return a.grupo.compareTo(b.grupo);
+        } else if (a.pontos != b.pontos) {
+          return b.pontos - a.pontos;
+        } else {
+          return b.golosMarcados - a.golosMarcados;
+        }
+      });
     });
-    print(_classif);
     return Future.delayed(Duration(seconds: 1), () => _classif);
   }
 

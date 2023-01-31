@@ -126,9 +126,8 @@ class AddJogador extends StatelessWidget{
                       "passaporte": passaporte.text,
                       "ultimoControloDoping": ultimoControloDoping.text,
                     });
-
                   Navigator.pushNamed(context, JogadoresInscritos.routeName);
-                  JogadoresInscritos(passaporte: passaporte.text); 
+                  JogadoresInscritos(); 
                   
                 },
                 style: ElevatedButton.styleFrom(

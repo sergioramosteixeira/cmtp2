@@ -62,6 +62,12 @@ class _AdminScreen extends State<AdminScreen> {
               padding: const EdgeInsets.all(10),
               child: AdminButton('Clubes Inscritos'),
             ),
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(0),
+              padding: const EdgeInsets.all(10),
+              child: AdminButton('Relatório de Jogadores Ativos'),
+            ),
           ]
         )
       )

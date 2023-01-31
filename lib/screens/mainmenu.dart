@@ -16,12 +16,6 @@ class _MainMenu extends State<MainMenu> {
 
   int currentMenu = 0;
 
-  void alert() {
-    setState(() {
-      currentMenu = 0;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,19 +33,19 @@ class _MainMenu extends State<MainMenu> {
               width: double.infinity,
               margin: const EdgeInsets.all(0),
               padding: const EdgeInsets.all(10),
-              child: BwinButton(alert, 'Liga BWIN'),
+              child: BwinButton('Liga BWIN'),
             ),
             Container(
               width: double.infinity,
               margin: const EdgeInsets.all(0),
               padding: const EdgeInsets.all(10),
-              child: SabsegButton(alert, 'Liga Sabseg'),
+              child: SabsegButton('Liga Sabseg'),
             ),
             Container(
               width: double.infinity,
               margin: const EdgeInsets.all(0),
               padding: const EdgeInsets.all(10),
-              child: AllianzButton(alert, 'Allianz Cup'),
+              child: AllianzButton('Allianz Cup'),
             ),
             Container(
               width: double.infinity,

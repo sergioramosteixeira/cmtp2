@@ -21,29 +21,52 @@ class _AddJogoState extends State<AddJogo> {
   final estadio = TextEditingController();
   final golosCasa = TextEditingController();
   final golosFora = TextEditingController();
-  final jornada = TextEditingController();
+  int jornada = 1;
 
   int currentMenu = 0;
 
   Clube _clubeCasa = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
   Clube _clubeFora = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
   String _liga = "BWIN";
+  List<String> clubes = [];
   List<DropdownMenuItem<Clube>> _options = [];
+  List<DropdownMenuItem<int>> _jornadas = [];
 
   final _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
+    updateClubes(_liga);
+    for(var i = 1; i <= 34; i++){
+      _jornadas.add(
+        DropdownMenuItem(
+          child: Text('$i'),
+          value: i,
+        ),
+      );
+    }
+  }
+
+  @override
+  void updateClubes(String l) {
     _options = [];
+    clubes = [];
+    _firestore.collection("clubesLiga").where("liga", isEqualTo: l).get().then((snapshot) {
+      snapshot.docs.forEach((document) {
+        clubes.add(document["clube"]);
+      });
+    });
     _firestore.collection("clubes").get().then((snapshot) {
       snapshot.docs.forEach((document) {
-        _options.add(
-          DropdownMenuItem(
-            child: Text(document["sigla"]),
-            value: Clube.fromJson(document),
-          ),
-        );
+        if (clubes.contains(document["sigla"])){
+          _options.add(
+            DropdownMenuItem(
+              child: Text(document["sigla"]),
+              value: Clube.fromJson(document),
+            ),
+          );
+        }
       });
       if (_options.isNotEmpty) {
         _clubeCasa = _options[0].value!;
@@ -53,7 +76,8 @@ class _AddJogoState extends State<AddJogo> {
       setState(() {});
     });
   }
-
+  
+     
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,16 +106,58 @@ class _AddJogoState extends State<AddJogo> {
                 ],
                 onChanged: (value) {
                   setState(() {
-                    _liga = value!;
+                    updateClubes(value!);
+                    _liga = value;
+                    _jornadas = [];
+                    if (_liga == "Allianz"){
+                      for(var i = 1; i <= 4; i++){
+                        _jornadas.add(
+                          DropdownMenuItem(
+                            child: Text('$i'),
+                            value: i,
+                          ),
+                        );
+                      }
+                      _jornadas.add(
+                        const DropdownMenuItem(
+                          child: Text('Quartos-Final'),
+                          value: 97,
+                        ),
+                      );
+                      _jornadas.add(
+                        const DropdownMenuItem(
+                          child: Text('Meia-Final'),
+                          value: 98,
+                        ),
+                      );
+                      _jornadas.add(
+                        const DropdownMenuItem(
+                          child: Text('Final'),
+                          value: 99,
+                        ),
+                      );
+                    }else{
+                      for(var i = 1; i <= 34; i++){
+                        _jornadas.add(
+                          DropdownMenuItem(
+                            child: Text('$i'),
+                            value: i,
+                          ),
+                        );
+                      }
+                    }
                   });
                 },
               ),
-              TextField(
-                controller: jornada,
-                decoration: const InputDecoration(
-                  labelText: "Jornada",
-                ),
-                keyboardType: TextInputType.text,
+              DropdownButton<int>(
+                isExpanded: true,
+                value: jornada,
+                items: _jornadas,
+                onChanged: (value) {
+                  setState(() {
+                    jornada = value!;
+                  });
+                },
               ),
               Row(
                 children: [
@@ -199,11 +265,11 @@ class _AddJogoState extends State<AddJogo> {
                       "estadio": estadio.text,
                       "arbitro": arbitro.text,
                       "liga": _liga,
-                      "jornada": jornada.text,
+                      "jornada": jornada,
                       "dataJogo": dataJogo.text,
                     });
 
-                  Navigator.pushNamed(context, AdminScreen.routeName);
+                  Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName));
                   AdminScreen(); 
                   
                 },

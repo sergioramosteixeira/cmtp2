@@ -9,6 +9,7 @@ class Classificacao {
   int derrotas;
   int pontos;
   int jogos;
+  String grupo;
 
 
 
@@ -20,7 +21,8 @@ class Classificacao {
     required this.empates,
     required this.derrotas,
     required this.pontos,
-    required this.jogos
+    required this.jogos,
+    required this.grupo
   });
 
   @override

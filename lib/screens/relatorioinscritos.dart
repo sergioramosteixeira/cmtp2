@@ -1,22 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/data/contratos.dart';
+import 'package:flutter_application_1/data/jogadores.dart';
 import 'package:flutter_application_1/models/clube.dart';
+import 'package:flutter_application_1/models/contrato.dart';
+import 'package:flutter_application_1/models/jogador.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
+import 'package:intl/intl.dart';
 
-class ClubesInscritos extends StatefulWidget{
-  static final String routeName = '/clubesinscritos';
+class RelatorioInscritos extends StatefulWidget{
+  static final String routeName = '/relatorioinscritos';
   
 
   @override
-  State<ClubesInscritos> createState() => _ClubesInscritosState();
+  State<RelatorioInscritos> createState() => _RelatorioInscritosState();
 }
 
   
-class _ClubesInscritosState extends State<ClubesInscritos> {
+class _RelatorioInscritosState extends State<RelatorioInscritos> {
 
   int currentMenu = 0;
+  
+  final Contratos _contratos = Contratos();
+  
+  DateFormat dateFormat = DateFormat("yyyy-MM-dd");
 
   Clube _clube = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
   String _liga = "BWIN";
@@ -43,7 +52,7 @@ class _ClubesInscritosState extends State<ClubesInscritos> {
     });
     _firestore.collection("clubes").get().then((snapshot) {
       snapshot.docs.forEach((document) {
-        if (!clubes.contains(document["sigla"])){
+        if (clubes.contains(document["sigla"])){
           _options.add(
             DropdownMenuItem(
               child: Text(document["sigla"]),
@@ -61,49 +70,7 @@ class _ClubesInscritosState extends State<ClubesInscritos> {
 
   @override
   Widget build(BuildContext context) {
-    Widget gruposDropdown = DropdownButton<String>(
-      isExpanded: true,
-      value: _grupo,
-      items: const [
-        DropdownMenuItem(
-          child: Text("Grupo A"),
-          value: "A",
-        ),
-        DropdownMenuItem(
-          child: Text("Grupo B"),
-          value: "B",
-        ),
-        DropdownMenuItem(
-          child: Text("Grupo C"),
-          value: "C",
-        ),
-        DropdownMenuItem(
-          child: Text("Grupo D"),
-          value: "D",
-        ),
-        DropdownMenuItem(
-          child: Text("Grupo E"),
-          value: "E",
-        ),
-        DropdownMenuItem(
-          child: Text("Grupo F"),
-          value: "F",
-        ),
-        DropdownMenuItem(
-          child: Text("Grupo G"),
-          value: "G",
-        ),
-        DropdownMenuItem(
-          child: Text("Grupo H"),
-          value: "H",
-        ),
-      ],
-      onChanged: (value) {
-        setState(() {
-          _grupo = value!;
-        });
-      },
-    );
+    
     return Scaffold(
       appBar: DefaultAppBar(logo: "lp"),
       body: SingleChildScrollView(
@@ -152,39 +119,38 @@ class _ClubesInscritosState extends State<ClubesInscritos> {
                   ),
                 ),
               ),
-              (_isDropdownVisible) ? gruposDropdown : Text(""),
-             
-              ElevatedButton(
-                onPressed: () {
-                  FirebaseFirestore.instance
-                    .collection("clubesLiga")
-                    .doc(_liga+"_"+_clube.sigla)
-                    .set({
-                      "clube": _clube.sigla,
-                      "liga": _liga,
-                      "grupo": (_liga == "Allianz") ? _grupo : "",
-                    });
-
-                  Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName));
-                  AdminScreen(); 
-                  
+              FutureBuilder<List<dynamic>>(
+                future: Future.wait([_contratos.getContratos(_clube)]),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.all(0),
+                      padding: const EdgeInsets.all(10),
+                      alignment: Alignment.center,
+                      child: DataTable(
+                        dataTextStyle: const TextStyle(color: Colors.black, fontFamily: 'Changa'),
+                        columns: const [
+                          DataColumn(label: Text('Jogador')),
+                          DataColumn(label: Text('Início do Contrato')),
+                          DataColumn(label: Text('Longevidade')),
+                        ],
+                        rows: _contratos.list
+                            .map((Contrato j) => DataRow(cells: [
+                              DataCell(Text(j.jogador)),
+                              DataCell(Text(dateFormat.format(j.inicioContrato))),
+                              DataCell(Text("${DateTime.now().difference(j.inicioContrato).inDays} dias")),
+                            ])).toList(),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("${snapshot.error}");
+                  }
+                  return CircularProgressIndicator();
                 },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, 
-                  backgroundColor: Colors.green.withOpacity(0.5), 
-                  padding: const EdgeInsets.all(15), 
-                  disabledForegroundColor: Colors.lightGreen.withOpacity(0.38), 
-                  disabledBackgroundColor: Colors.lightGreen.withOpacity(0.12),
-                  shadowColor: Colors.green,
-                  textStyle: const TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Changa',
-                  )
-                ), 
-                child: const Text(
-                 'Inscrever Clube',
-                ),
               ),
+             
+             
             ]
           )
         ),
