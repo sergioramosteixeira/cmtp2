@@ -120,7 +120,7 @@ class _RelatorioInscritosState extends State<RelatorioInscritos> {
                 ),
               ),
               FutureBuilder<List<dynamic>>(
-                future: Future.wait([_contratos.getContratos(_clube)]),
+                future: Future.wait([_contratos.getContratos(_clube, "longevidade")]),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Container(
@@ -129,7 +129,8 @@ class _RelatorioInscritosState extends State<RelatorioInscritos> {
                       padding: const EdgeInsets.all(10),
                       alignment: Alignment.center,
                       child: DataTable(
-                        dataTextStyle: const TextStyle(color: Colors.black, fontFamily: 'Changa'),
+                        headingRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 0, 62);},),
+                        headingTextStyle: const TextStyle(color: Colors.white, fontFamily: 'Changa'),
                         columns: const [
                           DataColumn(label: Text('Jogador')),
                           DataColumn(label: Text('Início do Contrato')),

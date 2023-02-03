@@ -27,7 +27,7 @@ class SabsegButton extends StatelessWidget{
       ), 
       child: Row(
         children: <Widget>[
-          Image.network(
+          Image.asset(
             'img/sabseg.png',
             height: 100,
           ),

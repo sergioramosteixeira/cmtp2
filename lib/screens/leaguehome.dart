@@ -1,5 +1,3 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/data/classificacoes.dart';
@@ -111,7 +109,7 @@ class _LeagueHomeState extends State<LeagueHome> {
         child: Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("../img/stadium.jpg"),
+              image: AssetImage("img/stadium.jpg"),
               fit: BoxFit.cover,
             ),
           ),

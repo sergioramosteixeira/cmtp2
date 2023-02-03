@@ -141,7 +141,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
         child: Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("../img/stadium.jpg"),
+              image: AssetImage("img/stadium.jpg"),
               fit: BoxFit.cover,
             ),
           ),

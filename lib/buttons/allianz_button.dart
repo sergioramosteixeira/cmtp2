@@ -28,7 +28,7 @@ class AllianzButton extends StatelessWidget{
       ), 
       child: Row(
         children: <Widget>[
-          Image.network(
+          Image.asset(
             'img/allianz.png',
             height: 100,
           ),

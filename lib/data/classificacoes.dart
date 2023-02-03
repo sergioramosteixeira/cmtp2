@@ -15,12 +15,9 @@ class Classificacoes {
   final CollectionReference _collectionClubes =FirebaseFirestore.instance.collection('clubesLiga');
   final CollectionReference _collectionJogos =FirebaseFirestore.instance.collection('jogos');
 
-  Future<List<Classificacao>> getClassificacao(Clubes clubes, String liga, int jornada) async {
-    _classif = [];
-    QuerySnapshot querySnapshot = await _collectionClubes.where('liga', isEqualTo: liga).get();
-    if (jornada>90) jornada = 34;
 
-    querySnapshot.docs.map((doc) => doc.data()).toList().forEach((clube) async {
+  Future<List<Classificacao>> processClube(Clubes clubes, String liga, int jornada, String sigla, dynamic grupo) async {
+    QuerySnapshot queryCasa = await _collectionJogos.where('liga', isEqualTo: liga).where('jornada', isLessThanOrEqualTo: jornada).where('clubeCasa', isEqualTo: sigla).get();
       int vitorias = 0;
       int empates = 0;
       int derrotas = 0;
@@ -28,9 +25,6 @@ class Classificacoes {
       int golosSofridos = 0;
       int jogos = 0;
       int pontos = 0;
-      dynamic c = clube;
-      QuerySnapshot queryCasa = await _collectionJogos.where('liga', isEqualTo: liga).where('jornada', isLessThanOrEqualTo: jornada).where('clubeCasa', isEqualTo: c['clube']).get();
-
       queryCasa.docs.map((doc) => doc.data()).toList().forEach((jogo) {
         dynamic j = jogo;
         jogos++;
@@ -49,7 +43,7 @@ class Classificacoes {
         }
       });
 
-      QuerySnapshot queryFora = await _collectionJogos.where('liga', isEqualTo: liga).where('jornada', isLessThanOrEqualTo: jornada).where('clubeFora', isEqualTo: c['clube']).get();
+      QuerySnapshot queryFora = await _collectionJogos.where('liga', isEqualTo: liga).where('jornada', isLessThanOrEqualTo: jornada).where('clubeFora', isEqualTo: sigla).get();
 
       queryFora.docs.map((doc) => doc.data()).toList().forEach((jogo) {
         dynamic j = jogo;
@@ -68,19 +62,52 @@ class Classificacoes {
           }
         }
       });
+      _classif.add(Classificacao(clube: clubes.getClubeBySigla(sigla), derrotas: derrotas, empates: empates, golosMarcados: golosMarcados, golosSofridos: golosSofridos, pontos: pontos, vitorias: vitorias, jogos: jogos, grupo: "$grupo"));
+      return _classif;
+  }
 
-      _classif.add(Classificacao(clube: clubes.getClubeBySigla(c['clube']), derrotas: derrotas, empates: empates, golosMarcados: golosMarcados, golosSofridos: golosSofridos, pontos: pontos, vitorias: vitorias, jogos: jogos, grupo: "${c['grupo']}"));
-      _classif.sort((a, b) {
-        if (a.grupo != b.grupo) {
-          return a.grupo.compareTo(b.grupo);
-        } else if (a.pontos != b.pontos) {
-          return b.pontos - a.pontos;
-        } else {
-          return b.golosMarcados - a.golosMarcados;
-        }
-      });
+
+  Future<List<Classificacao>> getClassificacao(Clubes clubes, String liga, int jornada) async {
+    _classif = [];
+    List<Future> futures = [];
+    QuerySnapshot querySnapshot = await _collectionClubes.where('liga', isEqualTo: liga).get();
+    if (jornada>90) jornada = 34;
+
+    querySnapshot.docs.map((doc) => doc.data()).toList().forEach((clube) async {
+      dynamic c = clube;
+      futures.add(processClube(clubes, liga, jornada, c['clube'], "${c['grupo']}"));
+      
+
+     
     });
-    return Future.delayed(Duration(seconds: 1), () => _classif);
+    await Future.wait(futures);
+    _classif.sort((a, b) {
+      if (a.grupo != b.grupo) {
+        return a.grupo.compareTo(b.grupo);
+      } else if (a.pontos != b.pontos) {
+        return b.pontos - a.pontos;
+      } else {
+        return b.golosMarcados - a.golosMarcados;
+      }
+    });
+    return  _classif;
+  }
+
+  Future<void> deleteFromClube(Clube clube) async {
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    // Buscar todos os documentos que atendem aos critérios da cláusula WHERE.
+    final QuerySnapshot querySnapshot = await _collectionClubes
+        .where("clube", isEqualTo: clube.sigla)
+        .get();
+
+    // Adicionar todos os documentos encontrados ao objeto WriteBatch.
+    querySnapshot.docs.forEach((DocumentSnapshot document) {
+      batch.delete(document.reference);
+    });
+
+    // Executar a exclusão em lote.
+    await batch.commit();
   }
 
   List<Classificacao> get list => _classif.toList();

@@ -26,7 +26,7 @@ class _AdminScreen extends State<AdminScreen> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("../img/stadium.jpg"),
+            image: AssetImage("img/stadium.jpg"),
             fit: BoxFit.cover,
           ),
         ),
@@ -67,6 +67,18 @@ class _AdminScreen extends State<AdminScreen> {
               margin: const EdgeInsets.all(0),
               padding: const EdgeInsets.all(10),
               child: AdminButton('Relatório de Jogadores Ativos'),
+            ),
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(0),
+              padding: const EdgeInsets.all(10),
+              child: AdminButton('Relatório de Contratos a Expirar'),
+            ),
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(0),
+              padding: const EdgeInsets.all(10),
+              child: AdminButton('Relatório de Controlos Antidoping'),
             ),
           ]
         )

@@ -1,12 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/data/clubes.dart';
+import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/clubesinscritos.dart';
+import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
-class AddClube extends StatelessWidget{
+class AddClube extends StatefulWidget{
   static final String routeName = '/addclube';
+  final String? clube;
+  AddClube({this.clube});
+
+  @override
+  State<AddClube> createState() => _AddClubeState();
+}
+
+class _AddClubeState extends State<AddClube> {
+  
+  final Clubes _clubes = Clubes();
 
   final nome = TextEditingController();
   final sigla = TextEditingController();
@@ -18,9 +31,36 @@ class AddClube extends StatelessWidget{
   final cidadeEstadio = TextEditingController();
   final capacidadeEstadio = TextEditingController();
 
+  String textButton = "Adicionar Clube";
 
-  int currentMenu = 0;
+  @override
+  void initState() {
+    super.initState();
 
+    if(widget.clube != null){
+        updateClube();
+    }    
+  }
+
+  @override
+  void updateClube() async {
+    await _clubes.getClubes();
+    Clube clube = _clubes.getClubeBySigla(widget.clube!);
+
+    nome.text=clube.nome;
+    sigla.text=clube.sigla;
+    logo.text=clube.logo;
+    fundado.text=clube.fundado.toString();
+    pais.text=clube.pais;
+    nomeEstadio.text=clube.nomeEstadio;
+    moradaEstadio.text=clube.moradaEstadio;
+    cidadeEstadio.text=clube.cidadeEstadio;
+    capacidadeEstadio.text=clube.capacidadeEstadio.toString();
+    textButton = "Alterar Clube";
+    setState(() {
+      
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +79,7 @@ class AddClube extends StatelessWidget{
                 keyboardType: TextInputType.text,
               ),
               TextField(
+                enabled: (widget.clube==null) ? true : false,
                 controller: sigla,
                 decoration: const InputDecoration(
                   labelText: "Sigla do Clube",
@@ -118,9 +159,12 @@ class AddClube extends StatelessWidget{
                       "cidadeEstadio": cidadeEstadio.text,
                       "capacidadeEstadio": capacidadeEstadioInt,
                     });
-
-                  Navigator.pushNamed(context, ClubesInscritos.routeName);
-                  ClubesInscritos(); 
+                  if(widget.clube==null) {
+                    Navigator.pushNamed(context, ClubesInscritos.routeName);
+                    ClubesInscritos(); 
+                  }else{
+                    Navigator.pushReplacementNamed(context, MainMenu.routeName);
+                  }
                   
                 },
                 style: ElevatedButton.styleFrom(
@@ -135,8 +179,8 @@ class AddClube extends StatelessWidget{
                     fontFamily: 'Changa',
                   )
                 ), 
-                child: const Text(
-                 'Adicionar Clube',
+                child: Text(
+                 textButton,
                 ),
               ),
             ]

@@ -20,22 +20,49 @@ class Contratos {
   final CollectionReference _collectionClubes =FirebaseFirestore.instance.collection('clubeJogadores');
   final CollectionReference _collectionJogadores=FirebaseFirestore.instance.collection('jogadores');
 
-  Future<List<Contrato>> getContratos(Clube clube) async {
+  Future<List<Contrato>> processJogador(String passaporte, String clube, String inicioContrato, String fimContrato, String numeroCamisola) async {
+    QuerySnapshot queryFora = await _collectionJogadores.where('passaporte', isEqualTo: passaporte).get();
+    queryFora.docs.map((doc) => doc.data()).toList().forEach((jogador) {
+      dynamic j = jogador;
+      
+      _contratos.add(Contrato(jogador: j["nomeCamisola"], clube: clube, inicioContrato: DateTime.parse(inicioContrato), fimContrato: DateTime.parse(fimContrato), numeroCamisola: int.parse(numeroCamisola)));
+
+      
+    });
+    return _contratos;
+  }
+
+
+  Future<List<Contrato>> getContratos(Clube clube, String tipo) async {
+    List<Future> futures = [];
+    if(tipo == "longevidade"){
       _contratos = [];
       QuerySnapshot querySnapshot = await _collectionClubes.where('clube', isEqualTo: clube.sigla).where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(DateTime.now())).get();
 
       querySnapshot.docs.map((doc) => doc.data()).toList().forEach((clube) async {
         dynamic c = clube;
-        QuerySnapshot queryFora = await _collectionJogadores.where('passaporte', isEqualTo: c["passaporte"]).get();
-        queryFora.docs.map((doc) => doc.data()).toList().forEach((jogador) {
-          dynamic j = jogador;
-          
-          _contratos.add(Contrato(jogador: j["nomeCamisola"], clube: c["clube"], inicioContrato: DateTime.parse(c["inicioContrato"]), fimContrato: DateTime.parse(c["fimContrato"]), numeroCamisola: int.parse(c["numeroCamisola"])));
-          _contratos.sort((a, b) => a.inicioContrato.compareTo(b.inicioContrato));
-          
+        futures.add(processJogador(c["passaporte"], c["clube"], c["inicioContrato"], c["fimContrato"], c["numeroCamisola"]));
       });
-    });
-    return Future.delayed(Duration(milliseconds: 500), () => _contratos);
+      
+      await Future.wait(futures);
+      _contratos.sort((a, b) => a.inicioContrato.compareTo(b.inicioContrato));
+    }
+    if(tipo == "a expirar"){
+      _contratos = [];
+      DateTime date=DateTime.now();
+      QuerySnapshot querySnapshot = await _collectionClubes.where('clube', isEqualTo: clube.sigla).where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(date)).where('fimContrato', isLessThanOrEqualTo: dateFormat.format(DateTime(date.year, date.month + 6, date.day))).get();
+
+      querySnapshot.docs.map((doc) => doc.data()).toList().forEach((clube) async {
+        dynamic c = clube;
+        futures.add(processJogador(c["passaporte"], c["clube"], c["inicioContrato"], c["fimContrato"], c["numeroCamisola"]));
+      });
+      
+      await Future.wait(futures);
+      _contratos.sort((a, b) => a.fimContrato.compareTo(b.fimContrato));
+    }
+     
+      
+    return _contratos;
   }
 
   

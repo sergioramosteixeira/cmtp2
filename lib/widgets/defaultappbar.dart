@@ -46,7 +46,7 @@ class _DefaultAppBarState extends State<DefaultAppBar> {
       flexibleSpace: (widget.texto == null) ? Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("../img/${widget.logo}.png"),
+            image: AssetImage("./img/${widget.logo}.png"),
             fit: BoxFit.fitHeight,
           ),
         ),

@@ -47,7 +47,22 @@ class Jogadores {
     return Future.delayed(Duration(seconds: 1), () => _jogadores);
   }
 
+  Future<void> deleteFromClube(Clube clube, {String? passaporte}) async {
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
+    QuerySnapshot querySnapshot;
+    // Buscar todos os documentos que atendem aos critérios da cláusula WHERE.
+    (passaporte != null) ? 
+      querySnapshot = await _collectionClubes.where("clube", isEqualTo: clube.sigla).where("passaporte", isEqualTo: passaporte).get() :
+      querySnapshot = await _collectionClubes.where("clube", isEqualTo: clube.sigla).get();
 
+    // Adicionar todos os documentos encontrados ao objeto WriteBatch.
+    querySnapshot.docs.forEach((DocumentSnapshot document) {
+      batch.delete(document.reference);
+    });
+
+    // Executar a exclusão em lote.
+    await batch.commit();
+  }
   
 
   List<Jogador> get list => _jogadores.toList();

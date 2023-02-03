@@ -28,7 +28,31 @@ class Jogos {
       return _jogos;
   }
 
-  
+  Future<void> deleteFromClube(Clube clube) async {
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    // Buscar todos os documentos que atendem aos critérios da cláusula WHERE.
+    final QuerySnapshot querySnapshot = await _collectionRef
+        .where("clubeCasa", isEqualTo: clube.sigla)
+        .get();
+
+    // Adicionar todos os documentos encontrados ao objeto WriteBatch.
+    querySnapshot.docs.forEach((DocumentSnapshot document) {
+      batch.delete(document.reference);
+    });
+
+    final QuerySnapshot querySnapshot2 = await _collectionRef
+        .where("clubeFora", isEqualTo: clube.sigla)
+        .get();
+
+    // Adicionar todos os documentos encontrados ao objeto WriteBatch.
+    querySnapshot2.docs.forEach((DocumentSnapshot document) {
+      batch.delete(document.reference);
+    });
+
+    // Executar a exclusão em lote.
+    await batch.commit();
+  }
 
   List<Jogo> get list => _jogos.toList();
 }

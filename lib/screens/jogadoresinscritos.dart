@@ -4,13 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogador.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
+import 'package:flutter_application_1/screens/clubescreen.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 import 'package:intl/intl.dart';
 
 class JogadoresInscritos extends StatefulWidget{
   static final String routeName = '/jogadoresinscritos';
+  String? clube;
   String? passaporte;
-  JogadoresInscritos({this.passaporte});
+  JogadoresInscritos({this.clube, this.passaporte});
 
   @override
   State<JogadoresInscritos> createState() => _JogadoresInscritosState();
@@ -66,7 +68,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
         );
       });
       if (_options.isNotEmpty) {
-        _clube = _options[0].value!;
+        (widget.clube != null) ? _clube = _options.firstWhere((element) => element.value!.sigla == widget.clube).value! : _clube = _options[0].value!;
       }
       setState(() {});
     });
@@ -153,7 +155,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                           "numeroCamisola": numeroCamisola.text,
                         });
 
-                      Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName));
+                      (widget.clube == null) ? Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName)) : Navigator.pushReplacementNamed(context, ClubeScreen.routeName+"/"+widget.clube!);
                       AdminScreen(); 
                       
                     },

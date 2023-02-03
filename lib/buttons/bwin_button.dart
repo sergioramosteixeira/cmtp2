@@ -27,8 +27,8 @@ class BwinButton extends StatelessWidget{
       ), 
       child: Row(
         children: <Widget>[
-          Image.network(
-            'img/bwin.png',
+          Image.asset(
+            './img/bwin.png',
             height: 100,
           ),
           const Expanded(

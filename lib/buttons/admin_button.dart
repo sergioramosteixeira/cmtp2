@@ -4,7 +4,9 @@ import 'package:flutter_application_1/screens/addjogador.dart';
 import 'package:flutter_application_1/screens/addjogo.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/clubesinscritos.dart';
+import 'package:flutter_application_1/screens/relatoriocontrolodoping.dart';
 import 'package:flutter_application_1/screens/relatorioinscritos.dart';
+import 'package:flutter_application_1/screens/relatoriorenovacoes.dart';
 
 import '../screens/jogadoresinscritos.dart';
 
@@ -45,6 +47,14 @@ class AdminButton extends StatelessWidget{
           case 'Relatório de Jogadores Ativos':
             Navigator.pushNamed(context, RelatorioInscritos.routeName);
             RelatorioInscritos(); 
+            break;
+          case 'Relatório de Contratos a Expirar':
+            Navigator.pushNamed(context, RelatorioRenovacoes.routeName);
+            RelatorioRenovacoes(); 
+            break;
+          case 'Relatório de Controlos Antidoping':
+            Navigator.pushNamed(context, RelatorioControloDoping.routeName);
+            RelatorioControloDoping(); 
             break;
           default:
         }

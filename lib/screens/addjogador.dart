@@ -5,22 +5,49 @@ import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/jogadoresinscritos.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
-class AddJogador extends StatelessWidget{
+class AddJogador extends StatefulWidget{
   static final String routeName = '/addjogador';
 
+  @override
+  State<AddJogador> createState() => _AddJogadorState();
+}
+
+class _AddJogadorState extends State<AddJogador> {
   final nomeCompleto = TextEditingController();
+
   final nomeCamisola = TextEditingController();
+
   final escolaridade = TextEditingController();
+
   final dataNascimento = TextEditingController();
+
   final nacionalidade = TextEditingController();
-  final posicao = TextEditingController();
+
+  String posicao = "Guarda-Redes";
+
   final peso = TextEditingController();
+
   final altura = TextEditingController();
+
   final passaporte = TextEditingController();
+
   final ultimoControloDoping = TextEditingController();
 
   int currentMenu = 0;
 
+  Future<DateTime?> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2023, 1),
+      firstDate: DateTime(1950, 8),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null)
+      setState(() {
+        controller.text = picked.toString();
+      });
+    return picked;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +86,32 @@ class AddJogador extends StatelessWidget{
                 ),
                 keyboardType: TextInputType.text,
               ),
-              TextField(
-                controller: posicao,
-                decoration: const InputDecoration(
-                  labelText: "Posição",
-                ),
-                keyboardType: TextInputType.text,
+              DropdownButton<String>(
+                isExpanded: true,
+                value: posicao,
+                items: const [
+                  DropdownMenuItem(
+                    child: Text("Guarda-Redes"),
+                    value: "Guarda-Redes",
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Defesa"),
+                    value: "Defesa",
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Médio"),
+                    value: "Médio",
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Avançado"),
+                    value: "Avançado",
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    posicao = value!;
+                  });
+                },
               ),
               TextField(
                 controller: dataNascimento,
@@ -72,6 +119,11 @@ class AddJogador extends StatelessWidget{
                   labelText: "Data de Nascimento",
                 ),
                 keyboardType: TextInputType.datetime,
+                onTap: () => _selectDate(context, dataNascimento).then((date) {
+                  if (date != null)
+                    dataNascimento.text =
+                        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                }),
               ),
               TextField(
                 controller: peso,
@@ -106,6 +158,10 @@ class AddJogador extends StatelessWidget{
                   labelText: "Último Controlo Anti-Doping",
                 ),
                 keyboardType: TextInputType.datetime,
+                onTap: () => _selectDate(context, ultimoControloDoping).then((date) {
+                  if (date != null)
+                    ultimoControloDoping.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                }),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -119,7 +175,7 @@ class AddJogador extends StatelessWidget{
                       "nomeCamisola": nomeCamisola.text,
                       "escolaridade": escolaridade.text,
                       "nacionalidade": nacionalidade.text,
-                      "posicao": posicao.text,
+                      "posicao": posicao,
                       "dataNascimento": dataNascimento.text,
                       "peso": pesoInt,
                       "altura": alturaInt,

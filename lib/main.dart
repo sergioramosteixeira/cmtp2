@@ -13,10 +13,14 @@ import 'package:flutter_application_1/screens/jogadorscreen.dart';
 import 'package:flutter_application_1/screens/leaguehome.dart';
 import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_1/screens/relatoriocontrolodoping.dart';
+import 'package:flutter_application_1/screens/relatoriorenovacoes.dart';
 
 import 'screens/relatorioinscritos.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -44,6 +48,15 @@ class App extends StatelessWidget {
           } 
           else Navigator.pushNamed(context, MainMenu.routeName);
         }
+        if ('/${pathElements[1]}' == AddClube.routeName) {
+          if (pathElements[2]!=null){
+            optionalArg = pathElements[2];
+            return MaterialPageRoute(
+              builder: (context) => AddClube(clube: optionalArg),
+            );
+          } 
+          else Navigator.pushNamed(context, AddClube.routeName);
+        }
         if ('/${pathElements[1]}' == JogadorScreen.routeName) {
           if (pathElements[2]!=null){
             optionalArg = pathElements[2];
@@ -53,6 +66,15 @@ class App extends StatelessWidget {
             );
           } 
           else Navigator.pushNamed(context, MainMenu.routeName);
+        }
+        if ('/${pathElements[1]}' == JogadoresInscritos.routeName) {
+          if (pathElements[2]!=null){
+            optionalArg = pathElements[2];
+            return MaterialPageRoute(
+              builder: (context) => JogadoresInscritos(clube: optionalArg),
+            );
+          } 
+          else Navigator.pushNamed(context, JogadoresInscritos.routeName);
         }
       },
       routes: {
@@ -69,6 +91,8 @@ class App extends StatelessWidget {
         ClubeScreen.routeName: (context) => ClubeScreen(clube: optionalArg),
         JogadorScreen.routeName: (context) => JogadorScreen(passaporte: optionalArg, jogador: optionalArg2,),
         RelatorioInscritos.routeName: (context) => RelatorioInscritos(),
+        RelatorioRenovacoes.routeName: (context) => RelatorioRenovacoes(),
+        RelatorioControloDoping.routeName: (context) => RelatorioControloDoping(),
       },
     );
   }

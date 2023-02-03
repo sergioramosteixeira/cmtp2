@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/data/classificacoes.dart';
@@ -8,8 +9,12 @@ import 'package:flutter_application_1/models/classificacao.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogador.dart';
 import 'package:flutter_application_1/models/jogo.dart';
+import 'package:flutter_application_1/screens/addclube.dart';
+import 'package:flutter_application_1/screens/jogadoresinscritos.dart';
 import 'package:flutter_application_1/screens/jogadorscreen.dart';
+import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 import 'package:intl/intl.dart';
 
@@ -27,12 +32,13 @@ class ClubeScreen extends StatefulWidget{
 class _ClubeScreenState extends State<ClubeScreen> {
   final Clubes _clubes = Clubes();
   final Jogadores _jogadores = Jogadores();
+  final Jogos _jogos = Jogos();
   final Classificacoes _classif = Classificacoes();
-  List<int> _jornadas = [];
+  List<Jogador> jogadores = [];
   
   Clube? _clube;
   
-  int jornada = 3;
+  bool admin = false;
 
   bool _nextEnabled = true;
   bool _previousEnabled = true;
@@ -40,15 +46,47 @@ class _ClubeScreenState extends State<ClubeScreen> {
   DateFormat dateFormat = DateFormat("yyyy-MM-dd");
 
 
-  @override
-  void initState() {
-    super.initState();
-    
-    _clubes.getClubes();
-    setState(() {
-      
-    });
+  
+
+  showConfirmationBox(BuildContext context) {
+    bool whattodo = false;
+    // set up the buttons
+    Widget cancelButton = ElevatedButton(
+      child: Text("Cancelar"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = ElevatedButton(
+      child: Text("Apagar"),
+      onPressed:  () {
+        Navigator.pop(context);
+        _jogadores.deleteFromClube(_clube!);
+        _classif.deleteFromClube(_clube!);
+        _jogos.deleteFromClube(_clube!);
+        FirebaseFirestore.instance.collection("clubes").doc(_clube!.sigla).delete();
+        Navigator.pushReplacementNamed(context, MainMenu.routeName);
+      },
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("OPERAÇÃO IRREVERSÍVEL!"),
+      content: Text("Tem a certeza que deseja continuar?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
+
+
 
   int calculateAge(String data) {
     DateTime birthDate = DateTime.parse(data);
@@ -66,6 +104,29 @@ class _ClubeScreenState extends State<ClubeScreen> {
       }
     }
     return age;
+  }
+
+  @override
+  void open() {
+    setState(() {
+      admin = true;
+    });
+  }
+
+  @override
+  void close() {
+    setState(() {
+      admin = false;
+    });
+  }
+
+  Future<Jogadores> update() async {
+    
+    if (_jogadores.list.isEmpty){
+      await _jogadores.getJogadores(_clube!);
+      jogadores = _jogadores.list;
+    } 
+    return _jogadores;
   }
 
 
@@ -137,8 +198,8 @@ class _ClubeScreenState extends State<ClubeScreen> {
                             ),
                           ), 
                               
-                          FutureBuilder<List<dynamic>>(
-                            future: Future.wait([_jogadores.getJogadores(_clube!)]),
+                          FutureBuilder(
+                            future: update(),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 return Container(
@@ -150,13 +211,13 @@ class _ClubeScreenState extends State<ClubeScreen> {
                                     dataTextStyle: const TextStyle(color: Colors.white, fontFamily: 'Changa'),
                                     headingRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 70, 202, 255).withOpacity(0.8);},),
                                     dataRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 13, 20).withOpacity(0.8);},),
-                                    columns: const [
-                                      DataColumn(label: Text('Jogador')),
-                                      DataColumn(label: Text('País')),
-                                      DataColumn(label: Text('Posição')),
-                                      DataColumn(label: Text('Idade')),
+                                    columns: [
+                                      const DataColumn(label: Text('Jogador')),
+                                      DataColumn(label: Text((admin == false) ? 'País' : 'Remover')),
+                                      const DataColumn(label: Text('Posição')),
+                                      const DataColumn(label: Text('Idade')),
                                     ],
-                                    rows: _jogadores.list
+                                    rows: jogadores
                                         .map((Jogador j) => DataRow(cells: [
                                           DataCell(
                                             InkWell(
@@ -164,7 +225,18 @@ class _ClubeScreenState extends State<ClubeScreen> {
                                               onTap: () => Navigator.pushNamed(context, '${JogadorScreen.routeName}/${j.passaporte}/${j.nomeCamisola}')
                                             ),
                                           ),
-                                          DataCell(Text(j.nacionalidade)),
+                                          DataCell((admin == false) ? 
+                                            Text(j.nacionalidade) : 
+                                            InkWell(
+                                              child: Text("X", style: TextStyle(color: Color.fromARGB(255, 213, 84, 84), fontWeight: FontWeight.bold),), 
+                                              onTap: () {
+                                                _jogadores.deleteFromClube(_clube!, passaporte: j.passaporte);
+                                                setState(() {
+                                                  jogadores.remove(j);
+                                                });
+                                              }
+                                            )
+                                          ),
                                           DataCell(Text(j.posicao)),
                                           DataCell(Text(calculateAge(dateFormat.format(j.dataNascimento)).toString())),
                                         ])).toList(),
@@ -195,7 +267,41 @@ class _ClubeScreenState extends State<ClubeScreen> {
             ),
           )
         ),
-      )
+      ),
+      floatingActionButtonLocation: ExpandableFab.location,
+      floatingActionButton: ExpandableFab(
+        onOpen: open,
+        onClose: close,
+        backgroundColor: Color.fromARGB(255, 12, 0, 62),
+        children: [
+          FloatingActionButton.small(
+            heroTag: "EditClube",
+            backgroundColor: Color.fromARGB(255, 12, 0, 62),
+            child: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.pushNamed(context, AddClube.routeName+"/"+_clube!.sigla);
+            },
+          ),
+          FloatingActionButton.small(
+            heroTag: "DeleteClube",
+            backgroundColor: Color.fromARGB(255, 140, 0, 0),
+            child: const Icon(Icons.delete),
+            onPressed: () {
+              var what = showConfirmationBox(context);
+            },
+          ),
+          FloatingActionButton.small(
+            heroTag: "AddJogador",
+            backgroundColor: Color.fromARGB(255, 12, 0, 62),
+            child: const Icon(Icons.person_add),
+            onPressed: () {
+              Navigator.pushNamed(context, JogadoresInscritos.routeName+"/"+_clube!.sigla);
+            },
+          ),
+          
+        ],
+      ), 
     );
   }
 }
+
