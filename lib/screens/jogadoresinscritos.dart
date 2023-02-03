@@ -36,6 +36,22 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
   List<String> clubejogadores = [];
   final _firestore = FirebaseFirestore.instance;
 
+  //Widget da seleção de data
+  Future<DateTime?> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1950, 8),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        controller.text = picked.toString();
+      });
+    }
+    return picked;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -143,6 +159,12 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                   labelText: "Início de Contrato",
                 ),
                 keyboardType: TextInputType.datetime,
+                onTap: () => _selectDate(context, inicioContrato).then((date) {
+                  if (date != null) {
+                    //Formato da data
+                    inicioContrato.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  }
+                }),
               ),
               TextField(
                 controller: fimContrato,
@@ -150,6 +172,12 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                   labelText: "Fim de Contrato",
                 ),
                 keyboardType: TextInputType.datetime,
+                onTap: () => _selectDate(context, fimContrato).then((date) {
+                  if (date != null) {
+                    //Formato da data
+                    fimContrato.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  }
+                }),
               ),
               TextField(
                 controller: numeroCamisola,
@@ -189,7 +217,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                         Navigator.pushReplacementNamed(context, ClubeScreen.routeName+"/"+widget.clube!) :
                         null;
                       (widget.passaporte != null) ? 
-                        Navigator.pushReplacementNamed(context, JogadorScreen.routeName+"/"+widget.passaporte!) :
+                        Navigator.pushReplacementNamed(context, JogadorScreen.routeName+"/"+widget.passaporte!+"/"+_jogador.nomeCamisola) :
                         null;
                       
                     },
@@ -210,7 +238,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                      'Inscrever Jogador',
                     ),
                   ),
-                  
+
                   //Botão de cancelar
                   ElevatedButton(
                     onPressed: () {
