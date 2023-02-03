@@ -2,14 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/jogador.dart';
-import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/jogadoresinscritos.dart';
 import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class AddJogador extends StatefulWidget{
-  static final String routeName = '/addjogador';
-  final String? passaporte;
+  //Screen de adicionar ou editar jogador
+
+  static final String routeName = '/addjogador';   //Rota
+  final String? passaporte;           //Se o parâmetro passaporte for nulo, é um jogador novo. Caso contrário, é uma edição
   AddJogador({this.passaporte});
 
   @override
@@ -17,39 +18,35 @@ class AddJogador extends StatefulWidget{
 }
 
 class _AddJogadorState extends State<AddJogador> {
+
   final nomeCompleto = TextEditingController();
-
   final nomeCamisola = TextEditingController();
-
   final escolaridade = TextEditingController();
-
   final dataNascimento = TextEditingController();
-
   final nacionalidade = TextEditingController();
+  final peso = TextEditingController();
+  final altura = TextEditingController();
+  final passaporte = TextEditingController();
+  final ultimoControloDoping = TextEditingController();
 
   String posicao = "Guarda-Redes";
 
-  final peso = TextEditingController();
-
-  final altura = TextEditingController();
-
-  final passaporte = TextEditingController();
-
-  final ultimoControloDoping = TextEditingController();
-
   String textButton = "Adicionar Jogador";
 
+
+  //Widget da seleção de data
   Future<DateTime?> _selectDate(BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(2023, 1),
+      initialDate: DateTime.now(),
       firstDate: DateTime(1950, 8),
       lastDate: DateTime(2101),
     );
-    if (picked != null)
+    if (picked != null) {
       setState(() {
         controller.text = picked.toString();
       });
+    }
     return picked;
   }
 
@@ -58,17 +55,17 @@ class _AddJogadorState extends State<AddJogador> {
     super.initState();
 
     if(widget.passaporte != null){
+        //Se houver parâmetro de passaporte, os campos são preenchidos automaticamente
         updateJogador();
     }    
   }
 
-  @override
   void updateJogador() async {
+    //Se houver parâmetro de passaporte, os campos são preenchidos automaticamente
     Jogador jogador;
     await FirebaseFirestore.instance.collection("jogadores").where("passaporte", isEqualTo: widget.passaporte).get().then((snapshot) {
       snapshot.docs.forEach((document) {
         jogador = Jogador.fromJson(document);
-
         nomeCompleto.text=jogador.nomeCompleto;
         nomeCamisola.text=jogador.nomeCamisola;
         escolaridade.text=jogador.escolaridade;
@@ -161,9 +158,11 @@ class _AddJogadorState extends State<AddJogador> {
                 ),
                 keyboardType: TextInputType.datetime,
                 onTap: () => _selectDate(context, dataNascimento).then((date) {
-                  if (date != null)
+                  if (date != null) {
+                    //Formato da Data
                     dataNascimento.text =
                         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  }
                 }),
               ),
               TextField(
@@ -201,14 +200,18 @@ class _AddJogadorState extends State<AddJogador> {
                 ),
                 keyboardType: TextInputType.datetime,
                 onTap: () => _selectDate(context, ultimoControloDoping).then((date) {
-                  if (date != null)
+                  if (date != null) {
+                    //Formato da data
                     ultimoControloDoping.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+                  }
                 }),
               ),
               ElevatedButton(
                 onPressed: () {
                   int pesoInt = int.parse(peso.text);
                   int alturaInt = int.parse(altura.text);
+
+                  //Inscrição / Alteração no Firestore
                   FirebaseFirestore.instance
                     .collection("jogadores")
                     .doc(passaporte.text)
@@ -224,15 +227,20 @@ class _AddJogadorState extends State<AddJogador> {
                       "passaporte": passaporte.text,
                       "ultimoControloDoping": ultimoControloDoping.text,
                     });
+
+                  //Se for novo jogador, vai para a página de associação de jogadores em clubes
+                  //Se for edição de jogador, retorna duas páginas
                   if(widget.passaporte==null) {
                     Navigator.pushNamed(context, JogadoresInscritos.routeName+"/jogador/"+passaporte.text);
                     JogadoresInscritos(); 
                   }else{
-                    Navigator.pushReplacementNamed(context, MainMenu.routeName);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
                   }
                   
                   
                 },
+                //Estilo do Botão de Confirmação
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white, 
                   backgroundColor: Colors.green.withOpacity(0.5), 

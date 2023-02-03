@@ -8,6 +8,7 @@ class BwinButton extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+  //Classe do Botão da Liga BWIN Genérico - mostrado nos diversos menus
     return ElevatedButton(
       onPressed: (){ 
         Navigator.pushNamed(context, LeagueHome.routeName+"/BWIN");

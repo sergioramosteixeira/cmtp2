@@ -1,6 +1,8 @@
 import 'package:flutter_application_1/models/clube.dart';
 
 class Classificacao {
+  //Modelo de dados da Classificação
+
   Clube clube;   
   int golosMarcados;
   int golosSofridos;   

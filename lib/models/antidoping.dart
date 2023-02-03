@@ -1,7 +1,8 @@
-import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogador.dart';
 
 class Antidoping {
+  //Modelo de dados do relatório Antidoping
+
   String clube;   
   Jogador jogador;
 

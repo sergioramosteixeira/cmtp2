@@ -11,6 +11,7 @@ import 'package:flutter_application_1/screens/relatoriorenovacoes.dart';
 import '../screens/jogadoresinscritos.dart';
 
 class AdminButton extends StatelessWidget{
+  //Classe do Botão de Administração de Genérico - mostrado nos diversos menus
   final _text;
 
   AdminButton(this._text);
@@ -20,6 +21,7 @@ class AdminButton extends StatelessWidget{
     return ElevatedButton(
       onPressed: (){ 
         switch (_text) {
+          //Ação de cada botão
           case 'Admin':
             Navigator.pushNamed(context, AdminScreen.routeName);
             AdminScreen(); 

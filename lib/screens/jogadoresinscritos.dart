@@ -5,13 +5,16 @@ import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogador.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/clubescreen.dart';
+import 'package:flutter_application_1/screens/jogadorscreen.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 import 'package:intl/intl.dart';
 
 class JogadoresInscritos extends StatefulWidget{
-  static final String routeName = '/jogadoresinscritos';
-  String? clube;
-  String? passaporte;
+  //Screen de associação de jogadores em clubes
+
+  static final String routeName = '/jogadoresinscritos';  //Rota
+  String? clube;            //Se o parâmetro clube não for nulo, o clube é preenchido automático
+  String? passaporte;       //Se o parâmetro passaporte não for nulo, o jogador é preenchido automático
   JogadoresInscritos({this.clube, this.passaporte});
 
   @override
@@ -21,7 +24,6 @@ class JogadoresInscritos extends StatefulWidget{
   
 class _JogadoresInscritosState extends State<JogadoresInscritos> {
   DateFormat dateFormat = DateFormat("yyyy-MM-dd");
-  int currentMenu = 0;
 
   final inicioContrato = TextEditingController();
   final fimContrato = TextEditingController();
@@ -38,6 +40,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
   void initState() {
     super.initState();
     _options = [];
+    //Se o parâmetro passaporte for nulo, são listados todos os jogadores livres
     if (widget.passaporte == null) {
       _firestore.collection("clubeJogadores").where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(DateTime.now())).get().then((snapshot) {
         snapshot.docs.forEach((document) {
@@ -59,6 +62,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
           _jogador = _optionsJogadores[0].value!;
         }
       });
+    //Se o parâmetro passaporte não for nulo, o jogador é preenchido automático
     } else {
       _firestore.collection("jogadores").where("passaporte", isEqualTo: widget.passaporte).get().then((snapshot) {
         snapshot.docs.forEach((document) {
@@ -74,6 +78,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
         }
       });
     }
+    //São listados todos os clubes portugueses e não portugueses
     _firestore.collection("clubes").get().then((snapshot) {
       snapshot.docs.forEach((document) {
         _options.add(
@@ -84,6 +89,7 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
         );
       });
       if (_options.isNotEmpty) {
+        //Se o parâmetro clube não for nulo, o clube é preenchido automático
         (widget.clube != null) ? _clube = _options.firstWhere((element) => element.value!.sigla == widget.clube).value! : _clube = _options[0].value!;
       }
       setState(() {});
@@ -160,6 +166,8 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
+
+                      //Inserção do registo no Firestore
                       FirebaseFirestore.instance
                         .collection("clubeJogadores")
                         .doc("${_jogador.passaporte}_${_clube.sigla}_${inicioContrato.text}")
@@ -171,10 +179,21 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                           "numeroCamisola": numeroCamisola.text,
                         });
 
-                      (widget.clube == null) ? Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName)) : Navigator.pushReplacementNamed(context, ClubeScreen.routeName+"/"+widget.clube!);
-                      AdminScreen(); 
+                      //Se o clube e o passaporte não tiverem sido mencionados, vai para a página do menu admin
+                      //Se o clube tiver sido mencionada, vai para a página desse clube
+                      //Se o passaporte tiver sido mencionado, vai para a página desse jogador
+                      (widget.clube == null && widget.passaporte == null) ? 
+                        Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName)) : 
+                        null;
+                      (widget.clube != null) ? 
+                        Navigator.pushReplacementNamed(context, ClubeScreen.routeName+"/"+widget.clube!) :
+                        null;
+                      (widget.passaporte != null) ? 
+                        Navigator.pushReplacementNamed(context, JogadorScreen.routeName+"/"+widget.passaporte!) :
+                        null;
                       
                     },
+                    //Estilo do botão de confirmação
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white, 
                       backgroundColor: Colors.green.withOpacity(0.5), 
@@ -191,6 +210,8 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
                      'Inscrever Jogador',
                     ),
                   ),
+                  
+                  //Botão de cancelar
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, AdminScreen.routeName);

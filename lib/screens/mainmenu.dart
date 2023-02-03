@@ -6,7 +6,9 @@ import 'package:flutter_application_1/buttons/sabseg_button.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class MainMenu extends StatefulWidget{
-  static final String routeName = '/';
+  //Screen do Menu Principal
+
+  static final String routeName = '/'; //Rota
 
   @override
   _MainMenu createState() => _MainMenu();

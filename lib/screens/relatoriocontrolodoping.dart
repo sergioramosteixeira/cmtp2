@@ -2,18 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/data/antidopings.dart';
-import 'package:flutter_application_1/data/contratos.dart';
-import 'package:flutter_application_1/data/jogadores.dart';
 import 'package:flutter_application_1/models/antidoping.dart';
 import 'package:flutter_application_1/models/clube.dart';
-import 'package:flutter_application_1/models/contrato.dart';
-import 'package:flutter_application_1/models/jogador.dart';
-import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 import 'package:intl/intl.dart';
 
 class RelatorioControloDoping extends StatefulWidget{
-  static final String routeName = '/relatoriocontrolodoping';
+  //Sreen do Relatorio de Controlo AntiDoping
+
+  static final String routeName = '/relatoriocontrolodoping'; //Rota
   
 
   @override
@@ -24,18 +21,8 @@ class RelatorioControloDoping extends StatefulWidget{
 class _RelatorioControloDopingState extends State<RelatorioControloDoping> {
 
   int dias = 60;
-  
   final Antidopings _jogadores = Antidopings();
-  
   DateFormat dateFormat = DateFormat("yyyy-MM-dd");
-
-  Clube _clube = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
-  String _liga = "BWIN";
-  List<DropdownMenuItem<Clube>> _options = [];
-  String _grupo = "A";
-  bool _isDropdownVisible = false;
-  List<String> clubes = [];
-  final _firestore = FirebaseFirestore.instance;
   TextEditingController numberController = TextEditingController();
 
   @override
@@ -43,7 +30,7 @@ class _RelatorioControloDopingState extends State<RelatorioControloDoping> {
     super.initState();
   }
 
-
+  //Método para alterar o número de dias a verificar
   void changeDias() {
     numberController = TextEditingController(text: dias.toString());
     showDialog(

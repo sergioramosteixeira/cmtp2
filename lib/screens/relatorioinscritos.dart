@@ -1,17 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_application_1/data/contratos.dart';
-import 'package:flutter_application_1/data/jogadores.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/contrato.dart';
-import 'package:flutter_application_1/models/jogador.dart';
-import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 import 'package:intl/intl.dart';
 
 class RelatorioInscritos extends StatefulWidget{
-  static final String routeName = '/relatorioinscritos';
+  //Sreen do Relatorio de Inscritos
+
+  static final String routeName = '/relatorioinscritos'; //Rota
   
 
   @override
@@ -21,17 +19,12 @@ class RelatorioInscritos extends StatefulWidget{
   
 class _RelatorioInscritosState extends State<RelatorioInscritos> {
 
-  int currentMenu = 0;
   
   final Contratos _contratos = Contratos();
-  
   DateFormat dateFormat = DateFormat("yyyy-MM-dd");
-
   Clube _clube = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
   String _liga = "BWIN";
   List<DropdownMenuItem<Clube>> _options = [];
-  String _grupo = "A";
-  bool _isDropdownVisible = false;
   List<String> clubes = [];
   final _firestore = FirebaseFirestore.instance;
 
@@ -43,6 +36,7 @@ class _RelatorioInscritosState extends State<RelatorioInscritos> {
 
   @override
   void updateClubes(String l) {
+    //Atualizar clubes conforme a liga selecionada
     _options = [];
     clubes = [];
     _firestore.collection("clubesLiga").where("liga", isEqualTo: l).get().then((snapshot) {
@@ -98,7 +92,6 @@ class _RelatorioInscritosState extends State<RelatorioInscritos> {
                 onChanged: (value) {
                   setState(() {
                     updateClubes(value!);
-                    (value == "Allianz") ? _isDropdownVisible = true : _isDropdownVisible = false;
                     _liga = value;
                   });
                 },

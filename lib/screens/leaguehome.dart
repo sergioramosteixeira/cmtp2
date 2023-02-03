@@ -1,15 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/data/classificacoes.dart';
 import 'package:flutter_application_1/data/clubes.dart';
 import 'package:flutter_application_1/data/jogos.dart';
 import 'package:flutter_application_1/models/classificacao.dart';
-import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogo.dart';
 import 'package:flutter_application_1/screens/addjogo.dart';
-import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/clubescreen.dart';
 import 'package:flutter_application_1/screens/clubesinscritos.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
@@ -19,8 +15,9 @@ import 'package:intl/intl.dart';
 
 
 class LeagueHome extends StatefulWidget{
-  static const String routeName = '/leaguehome';
-  final String liga;
+  //Screen com os jogos, resultados e classificações do campeonato
+  static const String routeName = '/leaguehome'; //Rota
+  final String liga;   //Parâmetro obrigatório: identigicação da Liga
   LeagueHome({required this.liga});
   
 
@@ -29,6 +26,7 @@ class LeagueHome extends StatefulWidget{
 }
 
 List<int> getJornadas(String liga) {
+    //Identificação das Jornadas (97 = quartos, 98 = meias, 99 = final)
     List<int> jornadas = [];
     switch (liga) {
       case "Allianz":
@@ -56,10 +54,9 @@ class _LeagueHomeState extends State<LeagueHome> {
   final Classificacoes _classif = Classificacoes();
   List<int> _jornadas = [];
   List<Classificacao> classificacao = [];
-  
+
   int jornada = 3;
   bool admin = false;
-
   bool _nextEnabled = true;
   bool _previousEnabled = true;
 
@@ -68,18 +65,22 @@ class _LeagueHomeState extends State<LeagueHome> {
 
   @override
   void initState() {
+    //Carregar Jornadas do Campeonato
     _jornadas = getJornadas(widget.liga);
     super.initState();
+    //Carregar Clubes do Campeonato
     _clubes.getClubes();
     setState(() {
       
     });
   }
 
+  //Widget de Alteração de Resultado
   showChangeResultado(BuildContext context, String clubeCasa, String clubeFora, int golosCasa, int golosFora) {
     final tGolosCasa = TextEditingController();
     final tGolosFora = TextEditingController();
-    // set up the buttons
+    
+    //Botões de Confirmação
     Widget cancelButton = ElevatedButton(
       child: Text("Cancelar"),
       onPressed:  () {
@@ -96,7 +97,7 @@ class _LeagueHomeState extends State<LeagueHome> {
         });
       },
     );
-    // set up the AlertDialog
+    //Widget de diálogo de alerta
     AlertDialog alert = AlertDialog(
       title: Text("Atualizar Resultado"),
       content: Column(
@@ -140,7 +141,7 @@ class _LeagueHomeState extends State<LeagueHome> {
         continueButton,
       ],
     );
-    // show the dialog
+    //Abrir o Diálogo
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -151,25 +152,29 @@ class _LeagueHomeState extends State<LeagueHome> {
     );
   }
 
-
+  //Jornada Seguinte
   void next() {
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
+        //Bloqueio/Desbloqueio dos botões quando chega ao fim da lista
         _jornadas.indexOf(jornada) < _jornadas.length - 2 ? _previousEnabled = true : _nextEnabled = false;
         _jornadas.indexOf(jornada) < _jornadas.length - 1 ? jornada=_jornadas[_jornadas.indexOf(jornada) + 1] : null;
       });
     });
   }
 
+  //Jornada Anterior
   void previous() {
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
+        //Bloqueio/Desbloqueio dos botões quando chega ao fim da lista
         _jornadas.indexOf(jornada) > 1 ? _nextEnabled = true : _previousEnabled = false;
         _jornadas.indexOf(jornada) > 0 ? jornada=_jornadas[_jornadas.indexOf(jornada) - 1] : null;
       });
     });
   }
 
+  //Identificação das Jornadas (97 = quartos, 98 = meias, 99 = final)
   String getJornada(int j){
     switch (j) {
       case 99:
@@ -185,6 +190,7 @@ class _LeagueHomeState extends State<LeagueHome> {
 
   @override
   void open() {
+    //Abrir menu admin
     setState(() {
       admin = true;
     });
@@ -192,6 +198,7 @@ class _LeagueHomeState extends State<LeagueHome> {
 
   @override
   void close() {
+    //Fechar menu admin
     setState(() {
       admin = false;
     });
@@ -216,6 +223,8 @@ class _LeagueHomeState extends State<LeagueHome> {
                   child: Text(
                     getJornada(jornada), style: TextStyle(color: Colors.white)),
                 ),
+
+                //Listagem de Jogos
                 FutureBuilder<List<dynamic>>(
                   future: Future.wait([_jogos.getJogos(_clubes, widget.liga, jornada)]),
                   builder: (context, snapshot) {
@@ -286,6 +295,8 @@ class _LeagueHomeState extends State<LeagueHome> {
                       : Text(""),
                   ],
                 ),
+
+                //Listagem da Classificação
                 FutureBuilder(
                   future: Future.wait([_classif.getClassificacao(_clubes, widget.liga, jornada)]),
                   builder: (context, snapshot) {
@@ -293,6 +304,7 @@ class _LeagueHomeState extends State<LeagueHome> {
                       int pos=1;
                       List<String> grupos = [];
                       List<Widget> widgets = [];
+                      //Se for Allianz Cup, listar em grupos
                       (widget.liga == "Allianz") ? grupos = ['A','B','C','D','E','F','G','H'] : grupos = [""];
                       grupos.forEach((grupo) => {
                         pos = 1,
@@ -359,6 +371,7 @@ class _LeagueHomeState extends State<LeagueHome> {
           )
         ),
       ),
+      //MENU ADMIN em Floating Action Buttons
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         onOpen: open,
@@ -370,6 +383,7 @@ class _LeagueHomeState extends State<LeagueHome> {
             backgroundColor: Color.fromARGB(255, 12, 0, 62),
             child: const Icon(Icons.add_to_queue),
             onPressed: () {
+              print(AddJogo.routeName+"/"+widget.liga);
               Navigator.pushNamed(context, AddJogo.routeName+"/"+widget.liga);
             },
           ),

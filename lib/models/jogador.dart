@@ -1,4 +1,6 @@
 class Jogador {
+    //Modelo de dados do Jogador
+
   String nomeCompleto;   
   String nomeCamisola; 
   String escolaridade; 
@@ -23,6 +25,7 @@ class Jogador {
     required this.ultimoControloDoping,
   });
 
+  //Método de conversão a partir de JSON (Firestore) para a classe
   factory Jogador.fromJson(dynamic json) {
     return Jogador(
       //clubeId: json['clubeId'],

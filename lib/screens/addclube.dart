@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/data/clubes.dart';
 import 'package:flutter_application_1/models/clube.dart';
-import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/clubesinscritos.dart';
 import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class AddClube extends StatefulWidget{
-  static final String routeName = '/addclube';
-  final String? clube;
+  //Screen de adicionar ou editar clubes
+
+  static final String routeName = '/addclube'; //Rota
+  final String? clube;   //Se o parâmetro clube for nulo, é um clube novo. Caso contrário, é uma edição
   AddClube({this.clube});
 
   @override
@@ -38,15 +39,16 @@ class _AddClubeState extends State<AddClube> {
     super.initState();
 
     if(widget.clube != null){
+        //Se houver parâmetro de clube, os campos são preenchidos automaticamente
         updateClube();
     }    
   }
 
   @override
   void updateClube() async {
+    //Se houver parâmetro de clube, os campos são preenchidos automaticamente
     await _clubes.getClubes();
     Clube clube = _clubes.getClubeBySigla(widget.clube!);
-
     nome.text=clube.nome;
     sigla.text=clube.sigla;
     logo.text=clube.logo;
@@ -145,6 +147,7 @@ class _AddClubeState extends State<AddClube> {
                 onPressed: () {
                   int fundadoInt = int.parse(fundado.text);
                   int capacidadeEstadioInt = int.parse(capacidadeEstadio.text);
+                  //Inscrição / Alteração no Firestore
                   FirebaseFirestore.instance
                     .collection("clubes")
                     .doc(sigla.text)
@@ -159,14 +162,18 @@ class _AddClubeState extends State<AddClube> {
                       "cidadeEstadio": cidadeEstadio.text,
                       "capacidadeEstadio": capacidadeEstadioInt,
                     });
+                  //Se for novo clube, vai para a página de inscrição de clubes em competições
+                  //Se for edição de clube, retorna duas páginas
                   if(widget.clube==null) {
                     Navigator.pushNamed(context, ClubesInscritos.routeName);
                     ClubesInscritos(); 
                   }else{
-                    Navigator.pushReplacementNamed(context, MainMenu.routeName);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
                   }
                   
                 },
+                //Estilo do Botão de confirmação
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white, 
                   backgroundColor: Colors.green.withOpacity(0.5), 

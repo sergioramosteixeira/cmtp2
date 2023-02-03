@@ -3,6 +3,8 @@ import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class AdminScreen extends StatefulWidget{
+  //Screen do Menu de Administração
+
   static final String routeName = '/adminscreen';
 
   @override
@@ -11,13 +13,6 @@ class AdminScreen extends StatefulWidget{
 
 class _AdminScreen extends State<AdminScreen> {
 
-  int currentMenu = 0;
-
-  void alert() {
-    setState(() {
-      currentMenu = 0;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,33 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/buttons/admin_button.dart';
-import 'package:flutter_application_1/data/classificacoes.dart';
-import 'package:flutter_application_1/data/clubes.dart';
-import 'package:flutter_application_1/data/contratos.dart';
 import 'package:flutter_application_1/data/historicojogador.dart';
-import 'package:flutter_application_1/data/jogadores.dart';
-import 'package:flutter_application_1/data/jogos.dart';
-import 'package:flutter_application_1/models/classificacao.dart';
-import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/contrato.dart';
 import 'package:flutter_application_1/models/jogador.dart';
-import 'package:flutter_application_1/models/jogo.dart';
 import 'package:flutter_application_1/screens/addjogador.dart';
-import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/jogadoresinscritos.dart';
 import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 import 'package:intl/intl.dart';
-
 import 'clubescreen.dart';
 
 
 class JogadorScreen extends StatefulWidget{
-  static const String routeName = '/jogador';
-  final String passaporte;
-  final String jogador;
+  //Screen de mostragem do jogador
+
+  static const String routeName = '/jogador'; //Rota
+  final String passaporte;    //Parâmetro obrigatório: passaporte
+  final String jogador;       //Parâmetro obrigatório: nome do Jogador
   JogadorScreen({required this.passaporte, required this.jogador});
   
 
@@ -36,21 +27,16 @@ class JogadorScreen extends StatefulWidget{
 }
 
 class _JogadorScreenState extends State<JogadorScreen> {
-  List<int> _jornadas = [];
   
+  List<int> _jornadas = [];
   final HistoricoJogador _historico = HistoricoJogador();
   List<Contrato> historico = [];
   Jogador _jogador = Jogador(nomeCompleto: "a", nomeCamisola: "a", escolaridade: "a", nacionalidade: "a", posicao: "a", dataNascimento: DateTime(2000,1,1), peso: 0, altura: 0, passaporte: 'a', ultimoControloDoping: DateTime(2000,1,1));
-  
-  int jornada = 3;
-
-  bool _nextEnabled = true;
-  bool _previousEnabled = true;
 
   DateFormat dateFormat = DateFormat("yyyy-MM-dd");
   final _firestore = FirebaseFirestore.instance;
 
-  List<Widget> teste = [ ];
+  List<Widget> infopessoal = [ ];
   bool admin = false;
 
   @override
@@ -65,13 +51,14 @@ class _JogadorScreenState extends State<JogadorScreen> {
 
   @override
   void fetchData() {
+    //Buscar os dados pessoais do jogador no Firestore e preencher na janela correspondente
     _firestore.collection("jogadores").where("passaporte", isEqualTo: widget.passaporte).get().then((snapshot) {
       snapshot.docs.forEach((document) {
         _jogador=Jogador.fromJson(document);
       });
 
       setState(() {
-        teste = [ 
+        infopessoal = [ 
           Row(children: [
             Text("Nome Completo: ", style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromARGB(255, 70, 202, 255)),),
             Text(_jogador.nomeCompleto, style: TextStyle(color: Colors.white))
@@ -117,8 +104,10 @@ class _JogadorScreenState extends State<JogadorScreen> {
     });
   }
 
+  //Widget de Confirmação de Eliminação de Registo
    showConfirmationBox(BuildContext context) {
-    // set up the buttons
+    
+    //Botões de Seleção
     Widget cancelButton = ElevatedButton(
       child: Text("Cancelar"),
       onPressed:  () {
@@ -134,7 +123,8 @@ class _JogadorScreenState extends State<JogadorScreen> {
         Navigator.pushReplacementNamed(context, MainMenu.routeName);
       },
     );
-    // set up the AlertDialog
+
+    //Widget de Diálogo de Alerta
     AlertDialog alert = AlertDialog(
       title: Text("OPERAÇÃO IRREVERSÍVEL!"),
       content: Text("Tem a certeza que deseja continuar?"),
@@ -143,7 +133,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
         continueButton,
       ],
     );
-    // show the dialog
+     //Abrir o Diálogo de Alerta 
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -152,6 +142,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
     );
   }
 
+  //Método para calcular a idade
   int calculateAge(String data) {
     DateTime birthDate = DateTime.parse(data);
     DateTime currentDate = DateTime.now();
@@ -172,6 +163,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
 
   @override
   void open() {
+    //Abrir menu admin
     setState(() {
       admin = true;
     });
@@ -179,11 +171,13 @@ class _JogadorScreenState extends State<JogadorScreen> {
 
   @override
   void close() {
+    //Fechar menu admin
     setState(() {
       admin = false;
     });
   }
 
+  //Atualizar Histórico de Carreira de Jogador
   Future<HistoricoJogador> update() async {
     
     if (_historico.list.isEmpty){
@@ -222,7 +216,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
                       padding: const EdgeInsets.all(10),
                       alignment: Alignment.center,
                       child: Column(
-                        children: teste
+                        children: infopessoal
                       ),
                       
                     ),
@@ -289,6 +283,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
           )
         ),
       ),
+      //MENU ADMIN em Floating Action Buttons
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         onOpen: open,

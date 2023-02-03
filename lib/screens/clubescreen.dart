@@ -1,14 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/data/classificacoes.dart';
 import 'package:flutter_application_1/data/clubes.dart';
 import 'package:flutter_application_1/data/jogadores.dart';
 import 'package:flutter_application_1/data/jogos.dart';
-import 'package:flutter_application_1/models/classificacao.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogador.dart';
-import 'package:flutter_application_1/models/jogo.dart';
 import 'package:flutter_application_1/screens/addclube.dart';
 import 'package:flutter_application_1/screens/jogadoresinscritos.dart';
 import 'package:flutter_application_1/screens/jogadorscreen.dart';
@@ -20,8 +17,10 @@ import 'package:intl/intl.dart';
 
 
 class ClubeScreen extends StatefulWidget{
-  static const String routeName = '/clube';
-  final String clube;
+  //Screen de mostragem do clube
+
+  static const String routeName = '/clube';  //Rota
+  final String clube;                 //Parâmetro obrigatório: Sigla do clube
   ClubeScreen({required this.clube});
   
 
@@ -37,11 +36,11 @@ class _ClubeScreenState extends State<ClubeScreen> {
   List<Jogador> jogadores = [];
   
   Clube? _clube;
-  
   bool admin = false;
-
   DateFormat dateFormat = DateFormat("yyyy-MM-dd");
 
+
+  //Widget de seleção da data
   Future<DateTime?> _selectDate(BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -56,9 +55,11 @@ class _ClubeScreenState extends State<ClubeScreen> {
     return picked;
   }
 
+  //Widget de Alteração da data de fim de contrato
   showDataTermino(BuildContext context, String passaporte) {
     final dataTermino = TextEditingController();
-    // set up the buttons
+    
+    //Botões de Seleção
     Widget cancelButton = ElevatedButton(
       child: Text("Cancelar"),
       onPressed:  () {
@@ -70,12 +71,12 @@ class _ClubeScreenState extends State<ClubeScreen> {
       onPressed:  () {
         Navigator.pop(context);
         _jogadores.terminarContrato(_clube!, passaporte, dataTermino.text);
-        setState(() {
-          
+        setState(() {  
         });
       },
     );
-    // set up the AlertDialog
+
+    //Widget de Diálogo de Alerta
     AlertDialog alert = AlertDialog(
       title: Text("Terminar Contrato"),
       content: Column(
@@ -83,13 +84,15 @@ class _ClubeScreenState extends State<ClubeScreen> {
         children: [
           TextFormField(
             controller: dataTermino,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Data Término do Contrato',
             ),
             onTap: () => _selectDate(context, dataTermino).then((date) {
-              if (date != null)
+              if (date != null) {
+                //Formato da data
                 dataTermino.text =
                     "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+              }
             }),
           ),
         ],
@@ -99,7 +102,7 @@ class _ClubeScreenState extends State<ClubeScreen> {
         continueButton,
       ],
     );
-    // show the dialog
+    //Abrir o Diálogo de Alerta
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -108,8 +111,10 @@ class _ClubeScreenState extends State<ClubeScreen> {
     );
   }
 
+  //Widget de Confirmação de Eliminação de Registo
   showConfirmationBox(BuildContext context) {
-    // set up the buttons
+    
+    //Botões de Seleção
     Widget cancelButton = ElevatedButton(
       child: Text("Cancelar"),
       onPressed:  () {
@@ -127,7 +132,8 @@ class _ClubeScreenState extends State<ClubeScreen> {
         Navigator.pushReplacementNamed(context, MainMenu.routeName);
       },
     );
-    // set up the AlertDialog
+
+    //Widget de Diálogo de Alerta
     AlertDialog alert = AlertDialog(
       title: Text("OPERAÇÃO IRREVERSÍVEL!"),
       content: Text("Tem a certeza que deseja continuar?"),
@@ -136,7 +142,8 @@ class _ClubeScreenState extends State<ClubeScreen> {
         continueButton,
       ],
     );
-    // show the dialog
+
+  //Abrir o Diálogo de Alerta 
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -146,7 +153,7 @@ class _ClubeScreenState extends State<ClubeScreen> {
   }
 
 
-
+  //Calcular a idade a partir da data de nascimento
   int calculateAge(String data) {
     DateTime birthDate = DateTime.parse(data);
     DateTime currentDate = DateTime.now();
@@ -167,6 +174,7 @@ class _ClubeScreenState extends State<ClubeScreen> {
 
   @override
   void open() {
+    //Abrir o menu de admin
     setState(() {
       admin = true;
     });
@@ -174,11 +182,13 @@ class _ClubeScreenState extends State<ClubeScreen> {
 
   @override
   void close() {
+    //Fechar o menu de admin
     setState(() {
       admin = false;
     });
   }
 
+  //Atualizar a lista de jogadores
   Future<Jogadores> update() async {
     
     if (_jogadores.list.isEmpty){
@@ -191,15 +201,13 @@ class _ClubeScreenState extends State<ClubeScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       appBar: DefaultAppBar(texto: "${widget.clube}"),
       body: SizedBox.expand(
         child: Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("../img/stadium.jpg"),
+              image: AssetImage("img/stadium.jpg"),
               fit: BoxFit.cover,
             ),
           ),
@@ -256,7 +264,8 @@ class _ClubeScreenState extends State<ClubeScreen> {
                                ]
                             ),
                           ), 
-                              
+
+                          //Lista de Jogadores 
                           FutureBuilder(
                             future: update(),
                             builder: (context, snapshot) {
@@ -338,6 +347,8 @@ class _ClubeScreenState extends State<ClubeScreen> {
           )
         ),
       ),
+
+      //MENU ADMIN em Floating Action Buttons
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         onOpen: open,

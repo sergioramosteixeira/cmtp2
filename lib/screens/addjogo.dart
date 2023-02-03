@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
+import 'package:flutter_application_1/screens/leaguehome.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class AddJogo extends StatefulWidget{
-  static final String routeName = '/addjogo';
-  String? liga;
+  //Screen de adicionar jogo
+
+  static const String routeName = '/addjogo'; //Rota
+  String? liga;       //Se o parâmetro liga não for nulo, é preenchido automático
   AddJogo({this.liga});
 
   @override
@@ -22,9 +25,8 @@ class _AddJogoState extends State<AddJogo> {
   final estadio = TextEditingController();
   final golosCasa = TextEditingController();
   final golosFora = TextEditingController();
+  
   int jornada = 1;
-
-  int currentMenu = 0;
 
   Clube _clubeCasa = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
   Clube _clubeFora = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
@@ -35,16 +37,50 @@ class _AddJogoState extends State<AddJogo> {
 
   final _firestore = FirebaseFirestore.instance;
 
-  @override
-  void initState() {
-    super.initState();
-    (widget.liga == null) ? _liga = _liga : _liga=widget.liga!;
-    updateClubes(_liga);
+  //Widget da seleção de data
+  Future<DateTime?> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1950, 8),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      final TimeOfDay? time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      setState(() {
+        controller.text = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          time!.hour,
+          time.minute,
+        ).toString();
+      });
+      return DateTime(picked.year,picked.month,picked.day, time!.hour,time.minute);
+    }
+    else {
+      return DateTime(picked!.year,picked.month,picked.day);
+    }
   }
 
   @override
-  void updateClubes(String l) {
+  void initState() {
+    super.initState();
+    //Se o parâmetro liga não for nulo, é preenchido automático
+    (widget.liga == null) ? _liga = _liga : _liga=widget.liga!;
+
+    update(_liga);
+  }
+
+  @override
+  void update(String l) {
+    //Atualização dos DropdownMenus conforme a liga selecionada
     _jornadas = [];
+
+    //Para as jornadas, em campeonato são 34 jornadas, na taça são 4 jornadas + quartos + meias + final
     if (_liga == "Allianz"){
       for(var i = 1; i <= 4; i++){
         _jornadas.add(
@@ -82,6 +118,8 @@ class _AddJogoState extends State<AddJogo> {
         );
       }
     }
+
+    //Preencher os dropdownMenus com os clubes inscritos na liga selecionada
     _options = [];
     clubes = [];
     _firestore.collection("clubesLiga").where("liga", isEqualTo: l).get().then((snapshot) {
@@ -103,6 +141,7 @@ class _AddJogoState extends State<AddJogo> {
       if (_options.isNotEmpty) {
         _clubeCasa = _options[0].value!;
         _clubeFora = _options[0].value!;
+        //Atualizar o campo de Estadio com o nome do Estádio da equipa de casa
         estadio.text = _options[0].value!.nomeEstadio;
       }
       setState(() {});
@@ -139,7 +178,7 @@ class _AddJogoState extends State<AddJogo> {
                 onChanged: (value) {
                   setState(() {
                     _liga = value!;
-                    updateClubes(value);
+                    update(value);
                     
                   });
                 },
@@ -167,6 +206,7 @@ class _AddJogoState extends State<AddJogo> {
                         onChanged: (value) {
                           setState(() {
                             _clubeCasa = value!;
+                            //Atualizar o campo de Estadio com o nome do Estádio da equipa de casa selecionada
                             estadio.text = value.nomeEstadio;
                           });
                         },
@@ -243,12 +283,20 @@ class _AddJogoState extends State<AddJogo> {
                   labelText: "Data e Hora do Jogo",
                 ),
                 keyboardType: TextInputType.datetime,
+                onTap: () => _selectDate(context, dataJogo).then((date) {
+                  if (date != null) {
+                    print(date);
+                    //Formato da data
+                    dataJogo.text = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+                  }
+                }),
               ),
-             
               ElevatedButton(
                 onPressed: () {
                   int golosCasaInt = int.parse(golosCasa.text);
                   int golosForaInt = int.parse(golosFora.text);
+
+                  //Adicionar no Firestore
                   FirebaseFirestore.instance
                     .collection("jogos")
                     .doc(dataJogo.text+"_"+_clubeCasa.sigla+"_"+_clubeFora.sigla)
@@ -264,10 +312,14 @@ class _AddJogoState extends State<AddJogo> {
                       "dataJogo": dataJogo.text,
                     });
 
-                  Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName));
-                  AdminScreen(); 
+                  //Se a liga não tiver sido mencionada, vai para a página do menu admin
+                  //Se a liga tiver sido mencionada, vai para a página dessa liga
+                  (widget.liga == null) ?
+                    Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName)) :
+                    Navigator.pushReplacementNamed(context, LeagueHome.routeName+"/"+widget.liga!);
                   
                 },
+                //Estilo do botão de Adicionar
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white, 
                   backgroundColor: Colors.green.withOpacity(0.5), 

@@ -9,6 +9,7 @@ class AllianzButton extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+  //Classe do Botão da Taça Allianz Genérico - mostrado nos diversos menus
     return ElevatedButton(
       onPressed: (){ 
         Navigator.pushNamed(context, LeagueHome.routeName+"/Allianz");

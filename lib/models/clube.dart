@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-
 class Clube {
-  //int clubeId;
+  //Modelo de dados do Clube
+
   String nome;
   String sigla;
   String logo;
@@ -13,7 +12,7 @@ class Clube {
   int capacidadeEstadio;
 
   Clube({
-      //required this.clubeId,
+
       required this.nome,
       required this.sigla,
       required this.logo,
@@ -24,9 +23,9 @@ class Clube {
       required this.cidadeEstadio,
       required this.capacidadeEstadio});
 
+  //Método de conversão a partir de JSON (Firestore) para a classe
   factory Clube.fromJson(dynamic json) {
     return Clube(
-      //clubeId: json['clubeId'],
       nome: json['nome'],
       sigla: json['sigla'],
       logo: json['logo'],
@@ -39,34 +38,6 @@ class Clube {
     );
   }
 
-  
-  /*Clube.fromJson(Map<String, dynamic> json) {
-    clubeId = json['clube_Id'];
-    nome = json['nome'];
-    sigla = json['sigla'];
-    logo = json['logo'];
-    pais = json['pais'];
-    fundado = json['fundado'];
-    nomeEstadio = json['nomeEstadio'];
-    moradaEstadio = json['moradaEstadio'];
-    cidadeEstadio = json['cidadeEstadio'];
-    capacidadeEstadio = json['capacidadeEstadio'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['clube_Id'] = this.clubeId;
-    data['nome'] = this.nome;
-    data['sigla'] = this.sigla;
-    data['logo'] = this.logo;
-    data['pais'] = this.pais;
-    data['fundado'] = this.fundado;
-    data['nomeEstadio'] = this.nomeEstadio;
-    data['moradaEstadio'] = this.moradaEstadio;
-    data['venue_address'] = this.cidadeEstadio;
-    data['capacidadeEstadio'] = this.capacidadeEstadio;
-    return data;
-  }*/
 
   @override
   String toString() {

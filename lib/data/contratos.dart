@@ -1,16 +1,10 @@
-
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/data/clubes.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/contrato.dart';
-import 'package:flutter_application_1/models/jogador.dart';
-import 'package:flutter_application_1/models/jogo.dart';
-
 import 'package:intl/intl.dart';
 
 class Contratos {
+  //Classe de dados para os Contratos de um Clube
 
   List<Contrato> _contratos = [];
   List<Contrato> get allContratos => [..._contratos];
@@ -20,6 +14,8 @@ class Contratos {
   final CollectionReference _collectionClubes =FirebaseFirestore.instance.collection('clubeJogadores');
   final CollectionReference _collectionJogadores=FirebaseFirestore.instance.collection('jogadores');
 
+
+  //Pesquisar no FireStore o jogador através do seu número de passaporte
   Future<List<Contrato>> processJogador(String passaporte, String clube, String inicioContrato, String fimContrato, String numeroCamisola) async {
     QuerySnapshot queryFora = await _collectionJogadores.where('passaporte', isEqualTo: passaporte).get();
     queryFora.docs.map((doc) => doc.data()).toList().forEach((jogador) {
@@ -33,9 +29,13 @@ class Contratos {
   }
 
 
+  //Pesquisar no FireStore os jogadores de um determinado clube
   Future<List<Contrato>> getContratos(Clube clube, String tipo) async {
     List<Future> futures = [];
-    if(tipo == "longevidade"){
+
+    if(tipo == "longevidade") {
+      //Todos os jogadores de um clube, ordenados pela sua longevidade
+     
       _contratos = [];
       QuerySnapshot querySnapshot = await _collectionClubes.where('clube', isEqualTo: clube.sigla).where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(DateTime.now())).get();
 
@@ -47,7 +47,9 @@ class Contratos {
       await Future.wait(futures);
       _contratos.sort((a, b) => a.inicioContrato.compareTo(b.inicioContrato));
     }
-    if(tipo == "a expirar"){
+    if(tipo == "a expirar") {
+      //Jogadores cujo contrato termina nos próximos 6 meses (ordenado pela data de expiração)
+
       _contratos = [];
       DateTime date=DateTime.now();
       QuerySnapshot querySnapshot = await _collectionClubes.where('clube', isEqualTo: clube.sigla).where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(date)).where('fimContrato', isLessThanOrEqualTo: dateFormat.format(DateTime(date.year, date.month + 6, date.day))).get();
