@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/data/classificacoes.dart';
 import 'package:flutter_application_1/data/clubes.dart';
+import 'package:flutter_application_1/data/contratos.dart';
 import 'package:flutter_application_1/data/historicojogador.dart';
 import 'package:flutter_application_1/data/jogadores.dart';
 import 'package:flutter_application_1/data/jogos.dart';
@@ -11,8 +12,12 @@ import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/contrato.dart';
 import 'package:flutter_application_1/models/jogador.dart';
 import 'package:flutter_application_1/models/jogo.dart';
+import 'package:flutter_application_1/screens/addjogador.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
+import 'package:flutter_application_1/screens/jogadoresinscritos.dart';
+import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 import 'package:intl/intl.dart';
 
@@ -34,7 +39,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
   List<int> _jornadas = [];
   
   final HistoricoJogador _historico = HistoricoJogador();
-
+  List<Contrato> historico = [];
   Jogador _jogador = Jogador(nomeCompleto: "a", nomeCamisola: "a", escolaridade: "a", nacionalidade: "a", posicao: "a", dataNascimento: DateTime(2000,1,1), peso: 0, altura: 0, passaporte: 'a', ultimoControloDoping: DateTime(2000,1,1));
   
   int jornada = 3;
@@ -46,6 +51,7 @@ class _JogadorScreenState extends State<JogadorScreen> {
   final _firestore = FirebaseFirestore.instance;
 
   List<Widget> teste = [ ];
+  bool admin = false;
 
   @override
   void initState() {
@@ -111,6 +117,40 @@ class _JogadorScreenState extends State<JogadorScreen> {
     });
   }
 
+   showConfirmationBox(BuildContext context) {
+    // set up the buttons
+    Widget cancelButton = ElevatedButton(
+      child: Text("Cancelar"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = ElevatedButton(
+      child: Text("Apagar"),
+      onPressed:  () {
+        Navigator.pop(context);
+        _historico.deleteJogador(_jogador.passaporte);
+        FirebaseFirestore.instance.collection("jogadores").doc(_jogador.passaporte).delete();
+        Navigator.pushReplacementNamed(context, MainMenu.routeName);
+      },
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("OPERAÇÃO IRREVERSÍVEL!"),
+      content: Text("Tem a certeza que deseja continuar?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
   int calculateAge(String data) {
     DateTime birthDate = DateTime.parse(data);
@@ -130,6 +170,31 @@ class _JogadorScreenState extends State<JogadorScreen> {
     return age;
   }
 
+  @override
+  void open() {
+    setState(() {
+      admin = true;
+    });
+  }
+
+  @override
+  void close() {
+    setState(() {
+      admin = false;
+    });
+  }
+
+  Future<HistoricoJogador> update() async {
+    
+    if (_historico.list.isEmpty){
+      await _historico.getHistorico(widget.passaporte);
+      historico = _historico.list;
+    } 
+    setState(() {
+      
+    });
+    return _historico;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,8 +226,8 @@ class _JogadorScreenState extends State<JogadorScreen> {
                       ),
                       
                     ),
-                    FutureBuilder<List<dynamic>>(
-                      future: Future.wait([_historico.getHistorico(widget.passaporte)]),
+                    FutureBuilder(
+                      future: update(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           return Container(
@@ -174,13 +239,13 @@ class _JogadorScreenState extends State<JogadorScreen> {
                               dataTextStyle: const TextStyle(color: Colors.white, fontFamily: 'Changa'),
                               headingRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 70, 202, 255).withOpacity(0.8);},),
                               dataRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 13, 20).withOpacity(0.8);},),
-                              columns: const [
-                                DataColumn(label: Text('Clube')),
-                                DataColumn(label: Text('Início')),
-                                DataColumn(label: Text('Fim')),
-                                DataColumn(label: Text('Camisola')),
+                              columns:  [
+                                const DataColumn(label: Text('Clube')),
+                                DataColumn(label: Text((admin == false) ? 'Camisola' : 'Remover')),
+                                const DataColumn(label: Text('Início')),
+                                const DataColumn(label: Text('Fim')),
                               ],
-                              rows: _historico.list
+                              rows: historico
                                   .map((Contrato j) => DataRow(cells: [
                                     DataCell(
                                       InkWell(
@@ -188,9 +253,20 @@ class _JogadorScreenState extends State<JogadorScreen> {
                                         onTap: () => Navigator.pushNamed(context, '${ClubeScreen.routeName}/${j.clube}')
                                       ),
                                     ),
+                                    DataCell((admin == false) ? 
+                                      Text(j.numeroCamisola.toString()) : 
+                                      InkWell(
+                                        child: Icon(Icons.delete, color:Color.fromARGB(255, 213, 84, 84)),
+                                        onTap: () {
+                                          _historico.deleteJogador(j.jogador, clube: j.clube);
+                                          setState(() {
+                                            historico.remove(j);
+                                          });
+                                        }
+                                      ),
+                                    ),
                                     DataCell(Text(dateFormat.format(j.inicioContrato).toString())),
                                     DataCell(Text(dateFormat.format(j.fimContrato).toString())),
-                                    DataCell(Text(j.numeroCamisola.toString())),
                                   ])).toList(),
                             ),
                           );
@@ -212,7 +288,40 @@ class _JogadorScreenState extends State<JogadorScreen> {
             ),
           )
         ),
-      )
+      ),
+      floatingActionButtonLocation: ExpandableFab.location,
+      floatingActionButton: ExpandableFab(
+        onOpen: open,
+        onClose: close,
+        backgroundColor: Color.fromARGB(255, 12, 0, 62),
+        children: [
+          FloatingActionButton.small(
+            heroTag: "EditJogador",
+            backgroundColor: Color.fromARGB(255, 12, 0, 62),
+            child: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.pushNamed(context, AddJogador.routeName+"/"+_jogador.passaporte);
+            },
+          ),
+          FloatingActionButton.small(
+            heroTag: "DeleteJogador",
+            backgroundColor: Color.fromARGB(255, 140, 0, 0),
+            child: const Icon(Icons.delete),
+            onPressed: () {
+              var what = showConfirmationBox(context);
+            },
+          ),
+          FloatingActionButton.small(
+            heroTag: "AddClubeJogador",
+            backgroundColor: Color.fromARGB(255, 12, 0, 62),
+            child: const Icon(Icons.add_moderator),
+            onPressed: () {
+              Navigator.pushNamed(context, JogadoresInscritos.routeName+"/jogador/"+_jogador.passaporte);
+            },
+          ),
+          
+        ],
+      ), 
     );
   }
 }

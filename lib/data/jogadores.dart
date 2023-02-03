@@ -63,6 +63,18 @@ class Jogadores {
     // Executar a exclusão em lote.
     await batch.commit();
   }
+
+  Future<void> terminarContrato(Clube clube, String passaporte, String novaData) async {
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
+    QuerySnapshot querySnapshot;
+    // Buscar todos os documentos que atendem aos critérios da cláusula WHERE.
+    querySnapshot = await _collectionClubes.where("clube", isEqualTo: clube.sigla).where("passaporte", isEqualTo: passaporte).get();
+    // Adicionar todos os documentos encontrados ao objeto WriteBatch.
+    querySnapshot.docs.forEach((DocumentSnapshot document) {
+      _collectionClubes.doc(document.id).update({"fimContrato": novaData});
+    });
+
+  }
   
 
   List<Jogador> get list => _jogadores.toList();

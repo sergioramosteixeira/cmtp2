@@ -40,16 +40,75 @@ class _ClubeScreenState extends State<ClubeScreen> {
   
   bool admin = false;
 
-  bool _nextEnabled = true;
-  bool _previousEnabled = true;
-
   DateFormat dateFormat = DateFormat("yyyy-MM-dd");
 
+  Future<DateTime?> _selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1950, 8),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null)
+      setState(() {
+        controller.text = picked.toString();
+      });
+    return picked;
+  }
 
-  
+  showDataTermino(BuildContext context, String passaporte) {
+    final dataTermino = TextEditingController();
+    // set up the buttons
+    Widget cancelButton = ElevatedButton(
+      child: Text("Cancelar"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = ElevatedButton(
+      child: Text("Terminar"),
+      onPressed:  () {
+        Navigator.pop(context);
+        _jogadores.terminarContrato(_clube!, passaporte, dataTermino.text);
+        setState(() {
+          
+        });
+      },
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Terminar Contrato"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: dataTermino,
+            decoration: InputDecoration(
+              labelText: 'Data Término do Contrato',
+            ),
+            onTap: () => _selectDate(context, dataTermino).then((date) {
+              if (date != null)
+                dataTermino.text =
+                    "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+            }),
+          ),
+        ],
+      ),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 
   showConfirmationBox(BuildContext context) {
-    bool whattodo = false;
     // set up the buttons
     Widget cancelButton = ElevatedButton(
       child: Text("Cancelar"),
@@ -213,7 +272,7 @@ class _ClubeScreenState extends State<ClubeScreen> {
                                     dataRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 13, 20).withOpacity(0.8);},),
                                     columns: [
                                       const DataColumn(label: Text('Jogador')),
-                                      DataColumn(label: Text((admin == false) ? 'País' : 'Remover')),
+                                      DataColumn(label: Text((admin == false) ? 'País' : 'Ações')),
                                       const DataColumn(label: Text('Posição')),
                                       const DataColumn(label: Text('Idade')),
                                     ],
@@ -227,14 +286,25 @@ class _ClubeScreenState extends State<ClubeScreen> {
                                           ),
                                           DataCell((admin == false) ? 
                                             Text(j.nacionalidade) : 
-                                            InkWell(
-                                              child: Text("X", style: TextStyle(color: Color.fromARGB(255, 213, 84, 84), fontWeight: FontWeight.bold),), 
-                                              onTap: () {
-                                                _jogadores.deleteFromClube(_clube!, passaporte: j.passaporte);
-                                                setState(() {
-                                                  jogadores.remove(j);
-                                                });
-                                              }
+                                            Row(
+                                              children: [
+                                                InkWell(
+                                                  child: Icon(Icons.delete, color:Color.fromARGB(255, 213, 84, 84)),
+                                                  onTap: () {
+                                                    _jogadores.deleteFromClube(_clube!, passaporte: j.passaporte);
+                                                    setState(() {
+                                                      jogadores.remove(j);
+                                                    });
+                                                  }
+                                                ),
+                                                Text(" | "),
+                                                InkWell(
+                                                  child: Icon(Icons.label_important_outlined, color:Color.fromARGB(255, 84, 213, 103)),
+                                                  onTap: () {
+                                                    showDataTermino(context, j.passaporte);
+                                                  }
+                                                ),
+                                              ],
                                             )
                                           ),
                                           DataCell(Text(j.posicao)),
@@ -287,7 +357,7 @@ class _ClubeScreenState extends State<ClubeScreen> {
             backgroundColor: Color.fromARGB(255, 140, 0, 0),
             child: const Icon(Icons.delete),
             onPressed: () {
-              var what = showConfirmationBox(context);
+              showConfirmationBox(context);
             },
           ),
           FloatingActionButton.small(
@@ -295,7 +365,7 @@ class _ClubeScreenState extends State<ClubeScreen> {
             backgroundColor: Color.fromARGB(255, 12, 0, 62),
             child: const Icon(Icons.person_add),
             onPressed: () {
-              Navigator.pushNamed(context, JogadoresInscritos.routeName+"/"+_clube!.sigla);
+              Navigator.pushNamed(context, JogadoresInscritos.routeName+"/clube/"+_clube!.sigla);
             },
           ),
           

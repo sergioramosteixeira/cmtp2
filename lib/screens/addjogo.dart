@@ -7,7 +7,8 @@ import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class AddJogo extends StatefulWidget{
   static final String routeName = '/addjogo';
-  
+  String? liga;
+  AddJogo({this.liga});
 
   @override
   State<AddJogo> createState() => _AddJogoState();
@@ -37,19 +38,50 @@ class _AddJogoState extends State<AddJogo> {
   @override
   void initState() {
     super.initState();
+    (widget.liga == null) ? _liga = _liga : _liga=widget.liga!;
     updateClubes(_liga);
-    for(var i = 1; i <= 34; i++){
-      _jornadas.add(
-        DropdownMenuItem(
-          child: Text('$i'),
-          value: i,
-        ),
-      );
-    }
   }
 
   @override
   void updateClubes(String l) {
+    _jornadas = [];
+    if (_liga == "Allianz"){
+      for(var i = 1; i <= 4; i++){
+        _jornadas.add(
+          DropdownMenuItem(
+            child: Text('$i'),
+            value: i,
+          ),
+        );
+      }
+      _jornadas.add(
+        const DropdownMenuItem(
+          child: Text('Quartos-Final'),
+          value: 97,
+        ),
+      );
+      _jornadas.add(
+        const DropdownMenuItem(
+          child: Text('Meia-Final'),
+          value: 98,
+        ),
+      );
+      _jornadas.add(
+        const DropdownMenuItem(
+          child: Text('Final'),
+          value: 99,
+        ),
+      );
+    }else{
+      for(var i = 1; i <= 34; i++){
+        _jornadas.add(
+          DropdownMenuItem(
+            child: Text('$i'),
+            value: i,
+          ),
+        );
+      }
+    }
     _options = [];
     clubes = [];
     _firestore.collection("clubesLiga").where("liga", isEqualTo: l).get().then((snapshot) {
@@ -106,46 +138,9 @@ class _AddJogoState extends State<AddJogo> {
                 ],
                 onChanged: (value) {
                   setState(() {
-                    updateClubes(value!);
-                    _liga = value;
-                    _jornadas = [];
-                    if (_liga == "Allianz"){
-                      for(var i = 1; i <= 4; i++){
-                        _jornadas.add(
-                          DropdownMenuItem(
-                            child: Text('$i'),
-                            value: i,
-                          ),
-                        );
-                      }
-                      _jornadas.add(
-                        const DropdownMenuItem(
-                          child: Text('Quartos-Final'),
-                          value: 97,
-                        ),
-                      );
-                      _jornadas.add(
-                        const DropdownMenuItem(
-                          child: Text('Meia-Final'),
-                          value: 98,
-                        ),
-                      );
-                      _jornadas.add(
-                        const DropdownMenuItem(
-                          child: Text('Final'),
-                          value: 99,
-                        ),
-                      );
-                    }else{
-                      for(var i = 1; i <= 34; i++){
-                        _jornadas.add(
-                          DropdownMenuItem(
-                            child: Text('$i'),
-                            value: i,
-                          ),
-                        );
-                      }
-                    }
+                    _liga = value!;
+                    updateClubes(value);
+                    
                   });
                 },
               ),

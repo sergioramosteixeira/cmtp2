@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/models/jogador.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/jogadoresinscritos.dart';
+import 'package:flutter_application_1/screens/mainmenu.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class AddJogador extends StatefulWidget{
   static final String routeName = '/addjogador';
+  final String? passaporte;
+  AddJogador({this.passaporte});
 
   @override
   State<AddJogador> createState() => _AddJogadorState();
@@ -33,7 +37,7 @@ class _AddJogadorState extends State<AddJogador> {
 
   final ultimoControloDoping = TextEditingController();
 
-  int currentMenu = 0;
+  String textButton = "Adicionar Jogador";
 
   Future<DateTime?> _selectDate(BuildContext context, TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
@@ -47,6 +51,40 @@ class _AddJogadorState extends State<AddJogador> {
         controller.text = picked.toString();
       });
     return picked;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if(widget.passaporte != null){
+        updateJogador();
+    }    
+  }
+
+  @override
+  void updateJogador() async {
+    Jogador jogador;
+    await FirebaseFirestore.instance.collection("jogadores").where("passaporte", isEqualTo: widget.passaporte).get().then((snapshot) {
+      snapshot.docs.forEach((document) {
+        jogador = Jogador.fromJson(document);
+
+        nomeCompleto.text=jogador.nomeCompleto;
+        nomeCamisola.text=jogador.nomeCamisola;
+        escolaridade.text=jogador.escolaridade;
+        dataNascimento.text=jogador.dataNascimento.toString();
+        nacionalidade.text=jogador.nacionalidade;
+        peso.text=jogador.peso.toString();
+        altura.text=jogador.altura.toString();
+        passaporte.text=jogador.passaporte;
+        ultimoControloDoping.text=jogador.ultimoControloDoping.toString();
+        posicao=jogador.posicao;
+        textButton = "Alterar Jogador";
+      });
+    });
+    setState(() {
+      
+    });
   }
 
   @override
@@ -86,9 +124,12 @@ class _AddJogadorState extends State<AddJogador> {
                 ),
                 keyboardType: TextInputType.text,
               ),
-              DropdownButton<String>(
+              DropdownButtonFormField<String>(
                 isExpanded: true,
                 value: posicao,
+                decoration: const InputDecoration(
+                  labelText: "Posição",
+                ),
                 items: const [
                   DropdownMenuItem(
                     child: Text("Guarda-Redes"),
@@ -146,6 +187,7 @@ class _AddJogadorState extends State<AddJogador> {
                 ],
               ),
               TextField(
+                enabled: (widget.passaporte==null) ? true : false,
                 controller: passaporte,
                 decoration: const InputDecoration(
                   labelText: "Passaporte",
@@ -169,7 +211,7 @@ class _AddJogadorState extends State<AddJogador> {
                   int alturaInt = int.parse(altura.text);
                   FirebaseFirestore.instance
                     .collection("jogadores")
-                    .doc("${passaporte.text}_${nomeCamisola.text}")
+                    .doc(passaporte.text)
                     .set({
                       "nomeCompleto": nomeCompleto.text, 
                       "nomeCamisola": nomeCamisola.text,
@@ -182,8 +224,13 @@ class _AddJogadorState extends State<AddJogador> {
                       "passaporte": passaporte.text,
                       "ultimoControloDoping": ultimoControloDoping.text,
                     });
-                  Navigator.pushNamed(context, JogadoresInscritos.routeName);
-                  JogadoresInscritos(); 
+                  if(widget.passaporte==null) {
+                    Navigator.pushNamed(context, JogadoresInscritos.routeName+"/jogador/"+passaporte.text);
+                    JogadoresInscritos(); 
+                  }else{
+                    Navigator.pushReplacementNamed(context, MainMenu.routeName);
+                  }
+                  
                   
                 },
                 style: ElevatedButton.styleFrom(
@@ -198,8 +245,8 @@ class _AddJogadorState extends State<AddJogador> {
                     fontFamily: 'Changa',
                   )
                 ), 
-                child: const Text(
-                 'Adicionar Jogador',
+                child: Text(
+                 textButton,
                 ),
               ),
             ]

@@ -28,30 +28,58 @@ class Jogos {
       return _jogos;
   }
 
-  Future<void> deleteFromClube(Clube clube) async {
+  Future<void> deleteFromClube(Clube clube, {Clube? clubeFora, String? liga}) async {
     final WriteBatch batch = FirebaseFirestore.instance.batch();
 
-    // Buscar todos os documentos que atendem aos critérios da cláusula WHERE.
-    final QuerySnapshot querySnapshot = await _collectionRef
-        .where("clubeCasa", isEqualTo: clube.sigla)
-        .get();
+    if (liga==null && clubeFora==null)
+    {
+      final QuerySnapshot querySnapshot = await _collectionRef
+          .where("clubeCasa", isEqualTo: clube.sigla)
+          .get();
 
-    // Adicionar todos os documentos encontrados ao objeto WriteBatch.
-    querySnapshot.docs.forEach((DocumentSnapshot document) {
-      batch.delete(document.reference);
-    });
+      // Adicionar todos os documentos encontrados ao objeto WriteBatch.
+      querySnapshot.docs.forEach((DocumentSnapshot document) {
+        batch.delete(document.reference);
+      });
 
-    final QuerySnapshot querySnapshot2 = await _collectionRef
-        .where("clubeFora", isEqualTo: clube.sigla)
-        .get();
+      final QuerySnapshot querySnapshot2 = await _collectionRef
+          .where("clubeFora", isEqualTo: clube.sigla)
+          .get();
 
-    // Adicionar todos os documentos encontrados ao objeto WriteBatch.
-    querySnapshot2.docs.forEach((DocumentSnapshot document) {
-      batch.delete(document.reference);
-    });
+      // Adicionar todos os documentos encontrados ao objeto WriteBatch.
+      querySnapshot2.docs.forEach((DocumentSnapshot document) {
+        batch.delete(document.reference);
+      });
+    } else {
+      final QuerySnapshot querySnapshot = await _collectionRef
+            .where("clubeCasa", isEqualTo: clube.sigla)
+            .where("clubeFora", isEqualTo: clubeFora!.sigla)
+            .where("liga", isEqualTo: liga)
+            .get();
+      
+      querySnapshot.docs.forEach((DocumentSnapshot document) {
+        batch.delete(document.reference);
+      });
+    }
 
     // Executar a exclusão em lote.
     await batch.commit();
+  }
+
+  Future<void> updateResultado(String liga, String clubeCasa, String clubeFora, int golosCasa, int golosFora) async {
+    final WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    
+    final QuerySnapshot querySnapshot = await _collectionRef
+          .where("clubeCasa", isEqualTo: clubeCasa)
+          .where("clubeFora", isEqualTo: clubeFora)
+          .where("liga", isEqualTo: liga)
+          .get();
+    
+    querySnapshot.docs.forEach((DocumentSnapshot document) {
+      _collectionRef.doc(document.id).update({"golosCasa": golosCasa, "golosFora": golosFora});
+    });
+
   }
 
   List<Jogo> get list => _jogos.toList();

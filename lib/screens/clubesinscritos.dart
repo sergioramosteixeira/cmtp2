@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
+import 'package:flutter_application_1/screens/leaguehome.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
 
 class ClubesInscritos extends StatefulWidget{
   static final String routeName = '/clubesinscritos';
-  
+  String? liga;
+  ClubesInscritos({this.liga});
 
   @override
   State<ClubesInscritos> createState() => _ClubesInscritosState();
@@ -20,6 +22,7 @@ class _ClubesInscritosState extends State<ClubesInscritos> {
 
   Clube _clube = Clube(capacidadeEstadio: 0, fundado: 0, cidadeEstadio: '', logo: '', moradaEstadio: '', nome: '', nomeEstadio: '', pais: '', sigla: '');
   String _liga = "BWIN";
+  
   List<DropdownMenuItem<Clube>> _options = [];
   String _grupo = "A";
   bool _isDropdownVisible = false;
@@ -29,6 +32,8 @@ class _ClubesInscritosState extends State<ClubesInscritos> {
   @override
   void initState() {
     super.initState();
+    (widget.liga == null) ? _liga = _liga : _liga=widget.liga!;
+    (_liga == "Allianz") ? _isDropdownVisible = true : _isDropdownVisible = false;
     updateClubes(_liga);
   }
 
@@ -165,8 +170,9 @@ class _ClubesInscritosState extends State<ClubesInscritos> {
                       "grupo": (_liga == "Allianz") ? _grupo : "",
                     });
 
-                  Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName));
-                  AdminScreen(); 
+                  (widget.liga == null) ? 
+                    Navigator.popUntil(context, ModalRoute.withName(AdminScreen.routeName)) :
+                    Navigator.popUntil(context, ModalRoute.withName(LeagueHome.routeName+"/"+widget.liga!));
                   
                 },
                 style: ElevatedButton.styleFrom(

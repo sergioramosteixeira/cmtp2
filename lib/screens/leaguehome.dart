@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/buttons/admin_button.dart';
 import 'package:flutter_application_1/data/classificacoes.dart';
 import 'package:flutter_application_1/data/clubes.dart';
@@ -6,9 +8,12 @@ import 'package:flutter_application_1/data/jogos.dart';
 import 'package:flutter_application_1/models/classificacao.dart';
 import 'package:flutter_application_1/models/clube.dart';
 import 'package:flutter_application_1/models/jogo.dart';
+import 'package:flutter_application_1/screens/addjogo.dart';
 import 'package:flutter_application_1/screens/adminscreen.dart';
 import 'package:flutter_application_1/screens/clubescreen.dart';
+import 'package:flutter_application_1/screens/clubesinscritos.dart';
 import 'package:flutter_application_1/widgets/defaultappbar.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 import 'package:intl/intl.dart';
 
@@ -50,8 +55,10 @@ class _LeagueHomeState extends State<LeagueHome> {
   final Jogos _jogos = Jogos();
   final Classificacoes _classif = Classificacoes();
   List<int> _jornadas = [];
+  List<Classificacao> classificacao = [];
   
   int jornada = 3;
+  bool admin = false;
 
   bool _nextEnabled = true;
   bool _previousEnabled = true;
@@ -67,6 +74,81 @@ class _LeagueHomeState extends State<LeagueHome> {
     setState(() {
       
     });
+  }
+
+  showChangeResultado(BuildContext context, String clubeCasa, String clubeFora, int golosCasa, int golosFora) {
+    final tGolosCasa = TextEditingController();
+    final tGolosFora = TextEditingController();
+    // set up the buttons
+    Widget cancelButton = ElevatedButton(
+      child: Text("Cancelar"),
+      onPressed:  () {
+        Navigator.pop(context);
+      },
+    );
+    Widget continueButton = ElevatedButton(
+      child: Text("Atualizar"),
+      onPressed:  () {
+        Navigator.pop(context);
+        _jogos.updateResultado(widget.liga, clubeCasa, clubeFora, int.parse(tGolosCasa.text), int.parse(tGolosFora.text));
+        setState(() {
+          
+        });
+      },
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Atualizar Resultado"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.25,
+                child: TextField(
+                  controller: tGolosCasa,
+                  decoration: const InputDecoration(
+                    labelText: "Golos Casa",
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                ),
+              ),
+              SizedBox(child: Center(child: Text("  ")), width: MediaQuery.of(context).size.width * 0.05),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.25,
+                child: TextField(
+                  controller: tGolosFora,
+                  decoration: const InputDecoration(
+                    labelText: "Golos Fora",
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        tGolosCasa.text = golosCasa.toString();
+        tGolosFora.text = golosFora.toString();
+        return alert;
+      },
+    );
   }
 
 
@@ -102,6 +184,20 @@ class _LeagueHomeState extends State<LeagueHome> {
   }
 
   @override
+  void open() {
+    setState(() {
+      admin = true;
+    });
+  }
+
+  @override
+  void close() {
+    setState(() {
+      admin = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: DefaultAppBar(logo: "${widget.liga}_h"),
@@ -133,18 +229,39 @@ class _LeagueHomeState extends State<LeagueHome> {
                           dataTextStyle: const TextStyle(color: Colors.white, fontFamily: 'Changa'),
                           headingRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 70, 202, 255).withOpacity(0.8);},),
                           dataRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 13, 20).withOpacity(0.8);},),
-                          columns: const [
-                            DataColumn(label: Text('Casa')),
-                            DataColumn(label: Text('')),
-                            DataColumn(label: Text('Fora')),
-                            DataColumn(label: Text('Data')),
+                          columns: [
+                            const DataColumn(label: Text('Casa')),
+                            const DataColumn(label: Text('')),
+                            const DataColumn(label: Text('Fora')),
+                            DataColumn(label: Text((admin == false) ? 'Data' : 'Ações')),
                           ],
                           rows: _jogos.list
                               .map((Jogo c) => DataRow(cells: [
                                 DataCell(Text(c.clubeCasa.sigla)),
                                 DataCell(Text("${c.golosCasa}-${c.golosFora}")),
                                 DataCell(Text(c.clubeFora.sigla)),
-                                DataCell(Text(dateFormat.format(c.dataJogo))),
+                                DataCell((admin == false) ? 
+                                  Text(dateFormat.format(c.dataJogo)) : 
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        child: Icon(Icons.delete, color:Color.fromARGB(255, 213, 84, 84)),
+                                        onTap: () {
+                                          _jogos.deleteFromClube(c.clubeCasa, clubeFora: c.clubeFora, liga: widget.liga);
+                                          setState(() {
+                                          });
+                                        }
+                                      ),
+                                      Text(" | "),
+                                      InkWell(
+                                        child: Icon(Icons.edit_note, color:Color.fromARGB(255, 84, 213, 103)),
+                                        onTap: () {
+                                          showChangeResultado(context, c.clubeCasa.sigla, c.clubeFora.sigla, c.golosCasa, c.golosFora);
+                                        }
+                                      ),
+                                    ],
+                                  )
+                                ),
                               ])).toList(),
                         ),
                       );
@@ -169,8 +286,8 @@ class _LeagueHomeState extends State<LeagueHome> {
                       : Text(""),
                   ],
                 ),
-                FutureBuilder<List<dynamic>>(
-                  future: Future.wait([_clubes.getClubes(),_classif.getClassificacao(_clubes, widget.liga, jornada)]),
+                FutureBuilder(
+                  future: Future.wait([_classif.getClassificacao(_clubes, widget.liga, jornada)]),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       int pos=1;
@@ -184,17 +301,27 @@ class _LeagueHomeState extends State<LeagueHome> {
                           dataTextStyle: const TextStyle(color: Colors.white, fontFamily: 'Changa'),
                           headingRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 70, 202, 255).withOpacity(0.8);},),
                           dataRowColor: MaterialStateColor.resolveWith((states) {return Color.fromARGB(255, 12, 13, 20).withOpacity(0.8);},),
-                          columns: const [
-                            DataColumn(label: Text('Pos')),
-                            DataColumn(label: Text('Clube')),
-                            DataColumn(label: Text('J')),
-                            DataColumn(label: Text('V-E-D')),
-                            DataColumn(label: Text('DG')),
-                            DataColumn(label: Text('Pts')),
+                          columns: [
+                            DataColumn(label: Text((admin == false) ? 'Pos' : 'Ações')),
+                            const DataColumn(label: Text('Clube')),
+                            const DataColumn(label: Text('J')),
+                            const DataColumn(label: Text('V-E-D')),
+                            const DataColumn(label: Text('DG')),
+                            const DataColumn(label: Text('Pts')),
                           ],
                           rows: _classif.list.where((e) => e.grupo==grupo || widget.liga != "Allianz")
                               .map((Classificacao c) => DataRow(cells: [
-                                DataCell(Text((pos++).toString())),
+                                DataCell((admin == false) ? 
+                                  Text((pos++).toString()) : 
+                                  InkWell(
+                                    child: Icon(Icons.delete, color:Color.fromARGB(255, 213, 84, 84)),
+                                    onTap: () {
+                                      _classif.deleteFromClube(c.clube, liga: widget.liga);
+                                      setState(() {
+                                      });
+                                    }
+                                  ),
+                                ),
                                 DataCell(
                                   InkWell(
                                     child: Text(c.clube.sigla),
@@ -231,7 +358,32 @@ class _LeagueHomeState extends State<LeagueHome> {
             ),
           )
         ),
-      )
+      ),
+      floatingActionButtonLocation: ExpandableFab.location,
+      floatingActionButton: ExpandableFab(
+        onOpen: open,
+        onClose: close,
+        backgroundColor: Color.fromARGB(255, 12, 0, 62),
+        children: [
+          FloatingActionButton.small(
+            heroTag: "AddJogo",
+            backgroundColor: Color.fromARGB(255, 12, 0, 62),
+            child: const Icon(Icons.add_to_queue),
+            onPressed: () {
+              Navigator.pushNamed(context, AddJogo.routeName+"/"+widget.liga);
+            },
+          ),
+          FloatingActionButton.small(
+            heroTag: "AddClubeLiga",
+            backgroundColor: Color.fromARGB(255, 12, 0, 62),
+            child: const Icon(Icons.add_moderator),
+            onPressed: () {
+              Navigator.pushNamed(context, ClubesInscritos.routeName+"/"+widget.liga);
+            },
+          ),
+          
+        ],
+      ), 
     );
   }
 }

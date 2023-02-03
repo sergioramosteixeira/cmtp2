@@ -60,7 +60,6 @@ class Contratos {
       await Future.wait(futures);
       _contratos.sort((a, b) => a.fimContrato.compareTo(b.fimContrato));
     }
-     
       
     return _contratos;
   }

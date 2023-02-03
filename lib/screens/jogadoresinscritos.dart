@@ -38,26 +38,42 @@ class _JogadoresInscritosState extends State<JogadoresInscritos> {
   void initState() {
     super.initState();
     _options = [];
-    _firestore.collection("clubeJogadores").where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(DateTime.now())).get().then((snapshot) {
-      snapshot.docs.forEach((document) {
-        clubejogadores.add(document["passaporte"]);
+    if (widget.passaporte == null) {
+      _firestore.collection("clubeJogadores").where('fimContrato', isGreaterThanOrEqualTo: dateFormat.format(DateTime.now())).get().then((snapshot) {
+        snapshot.docs.forEach((document) {
+          clubejogadores.add(document["passaporte"]);
+        });
       });
-    });
-    _firestore.collection("jogadores").get().then((snapshot) {
-      snapshot.docs.forEach((document) {
-        if (!clubejogadores.contains(document["passaporte"])){
+      _firestore.collection("jogadores").get().then((snapshot) {
+        snapshot.docs.forEach((document) {
+          if (!clubejogadores.contains(document["passaporte"])){
+            _optionsJogadores.add(
+              DropdownMenuItem(
+                child: Text(document["passaporte"]+"-"+document["nomeCamisola"]),
+                value: Jogador.fromJson(document),
+              ),
+            );
+          }
+        });
+        if (_optionsJogadores.isNotEmpty) {
+          _jogador = _optionsJogadores[0].value!;
+        }
+      });
+    } else {
+      _firestore.collection("jogadores").where("passaporte", isEqualTo: widget.passaporte).get().then((snapshot) {
+        snapshot.docs.forEach((document) {
           _optionsJogadores.add(
             DropdownMenuItem(
               child: Text(document["passaporte"]+"-"+document["nomeCamisola"]),
               value: Jogador.fromJson(document),
             ),
           );
+        });
+        if (_optionsJogadores.isNotEmpty) {
+          _jogador = _optionsJogadores[0].value!;
         }
       });
-      if (_optionsJogadores.isNotEmpty) {
-        _jogador = _optionsJogadores[0].value!;
-      }
-    });
+    }
     _firestore.collection("clubes").get().then((snapshot) {
       snapshot.docs.forEach((document) {
         _options.add(

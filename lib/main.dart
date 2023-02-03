@@ -57,6 +57,33 @@ class App extends StatelessWidget {
           } 
           else Navigator.pushNamed(context, AddClube.routeName);
         }
+        if ('/${pathElements[1]}' == AddJogador.routeName) {
+          if (pathElements[2]!=null){
+            optionalArg = pathElements[2];
+            return MaterialPageRoute(
+              builder: (context) => AddJogador(passaporte: optionalArg),
+            );
+          } 
+          else Navigator.pushNamed(context, AddClube.routeName);
+        }
+        if ('/${pathElements[1]}' == ClubesInscritos.routeName) {
+          if (pathElements[2]!=null){
+            optionalArg = pathElements[2];
+            return MaterialPageRoute(
+              builder: (context) => ClubesInscritos(liga: optionalArg),
+            );
+          } 
+          else Navigator.pushNamed(context, ClubesInscritos.routeName);
+        }
+        if ('/${pathElements[1]}' == AddJogo.routeName) {
+          if (pathElements[2]!=null){
+            optionalArg = pathElements[2];
+            return MaterialPageRoute(
+              builder: (context) => AddJogo(liga: optionalArg),
+            );
+          } 
+          else Navigator.pushNamed(context, ClubesInscritos.routeName);
+        }
         if ('/${pathElements[1]}' == JogadorScreen.routeName) {
           if (pathElements[2]!=null){
             optionalArg = pathElements[2];
@@ -68,10 +95,10 @@ class App extends StatelessWidget {
           else Navigator.pushNamed(context, MainMenu.routeName);
         }
         if ('/${pathElements[1]}' == JogadoresInscritos.routeName) {
-          if (pathElements[2]!=null){
-            optionalArg = pathElements[2];
+          if (pathElements[2]!=null && pathElements[3]!=null){
+            optionalArg = pathElements[3];
             return MaterialPageRoute(
-              builder: (context) => JogadoresInscritos(clube: optionalArg),
+              builder: (context) => (pathElements[2]=="clube") ? JogadoresInscritos(clube: optionalArg) : JogadoresInscritos(passaporte: optionalArg),
             );
           } 
           else Navigator.pushNamed(context, JogadoresInscritos.routeName);

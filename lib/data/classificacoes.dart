@@ -93,12 +93,17 @@ class Classificacoes {
     return  _classif;
   }
 
-  Future<void> deleteFromClube(Clube clube) async {
+  Future<void> deleteFromClube(Clube clube, {String? liga}) async {
     final WriteBatch batch = FirebaseFirestore.instance.batch();
 
-    // Buscar todos os documentos que atendem aos critérios da cláusula WHERE.
-    final QuerySnapshot querySnapshot = await _collectionClubes
+    final QuerySnapshot querySnapshot;
+    (liga == null) ?
+      querySnapshot = await _collectionClubes
         .where("clube", isEqualTo: clube.sigla)
+        .get() :
+      querySnapshot = await _collectionClubes
+        .where("clube", isEqualTo: clube.sigla)
+        .where("liga", isEqualTo: liga)
         .get();
 
     // Adicionar todos os documentos encontrados ao objeto WriteBatch.
